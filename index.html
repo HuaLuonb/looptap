@@ -1,24 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Looptap - A minimal game to waste your time</title>
-	<link href="style.css" rel="stylesheet" />
-	<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-	<script defer src="script.js"></script>
-</head>
-<body>
-	<section id="app">
-		<!-- Language Switch -->
-		<div id="language-switcher">
-			<select v-model="language" @change="changeLanguage">
-				<option value="en">English</option>
-				<option value="zh">中文</option>
-			</select>
-		</div>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<meta http-equiv="Cache-control" content="public" />
+		<meta
+			name="viewport"
+			content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+		/>
+		<meta name="description" content="A minimal game to waste your time." />
+		<meta name="keywords" content="minimal game, html5 game, svg game" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+		<meta name="apple-mobile-web-app-title" content="Looptap" />
+		<meta name="application-name" content="Looptap" />
+		<meta name="theme-color" content="#fbf9f6" />
+		<meta property="og:url" content="https://vasanthv.github.io/looptap" />
+		<meta property="og:image" content="https://vasanthv.github.io/looptap/banner.png" />
+		<meta property="og:title" content="Looptap" />
+		<meta property="og:description" content="A minimal game to waste your time." />
+		<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+		<link rel="icon" href="favicon.svg" />
+		<link rel="manifest" href="manifest.json" />
+		<link rel="mask-icon" href="safari-pinned-tab.svg" color="#2c3d51" />
+		<meta name="msapplication-TileColor" content="#fbf9f6" />
+		<meta name="theme-color" content="#fbf9f6" />
+		<title>Looptap - A minimal game to waste your time</title>
 
-		<!-- Game Canvas -->
+		<link href="style.css" rel="stylesheet" />
+		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+		<script defer src="script.js"></script>
+
+		<!-- ANALYTICS_SCRIPT: Please remove it for your use -->
+		<script async defer src="https://scripts.withcabin.com/hello.js"></script>
+
+	</head>
+
+	<body>
 		<section id="canvas">
 			<div id="game" style="height: 80vh; display: flex">
 				<svg id="looptap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -49,11 +67,11 @@
 						class="score"
 						id="best"
 						v-if="state === 'stopped'"
-						v-html="t('best') + ': ' + best"
+						v-html="'Best: '+best"
 					></text>
 					<g id="tip" v-if="state === 'init'">
-						<text x="50" y="68" text-anchor="middle" class="tip">{{ t('tip1') }}</text>
-						<text x="50" y="74" text-anchor="middle" class="tip">{{ t('tip2') }}</text>
+						<text x="50" y="68" text-anchor="middle" class="tip">Tap anywhere / press spacebar when</text>
+						<text x="50" y="74" text-anchor="middle" class="tip">the ball is on the colored area.</text>
 					</g>
 					<path
 						id="arc"
@@ -93,15 +111,24 @@
 				target="_blank"
 				v-bind:class="state === 'started' ? 'hide' : ''"
 			>
-				{{ t('share') }}
+				Share your score
 			</a>
 			<div id="about" v-if="state === 'init'">
-				{{ t('about1') }}
+				Looptap is made by
 				<a href="https://twitter.com/vsnthv" target="_blank">Vasanth</a>
 				<br />
-				{{ t('about2') }}
+				<a
+					href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+					class="twitter-share-button"
+					data-text="Looptap - a minimal game to waste your time."
+					data-url="https://vasanthv.github.io/looptap"
+					data-via="vsnthv"
+					data-hashtags="looptap"
+					data-show-count="false"
+					>Tweet</a
+				>
+				<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 			</div>
 		</section>
-	</section>
-</body>
+	</body>
 </html>
