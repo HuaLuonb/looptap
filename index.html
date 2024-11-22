@@ -103,55 +103,5 @@
 			</div>
 		</section>
 	</section>
-
-	<script>
-		Vue.createApp({
-			data() {
-				return {
-					state: 'init', // 游戏状态
-					score: 0,
-					best: 0,
-					taps: 0,
-					language: 'en', // 默认语言
-					translations: {
-						en: {
-							best: 'Best',
-							tip1: 'Tap anywhere / press spacebar when',
-							tip2: 'the ball is on the colored area.',
-							share: 'Share your score',
-							about1: 'Looptap is made by',
-							about2: 'A minimal game to waste your time.',
-						},
-						zh: {
-							best: '最高分',
-							tip1: '点击任意位置 / 按空格键',
-							tip2: '当小球在彩色区域时。',
-							share: '分享你的分数',
-							about1: 'Looptap 由',
-							about2: '一个用来浪费时间的极简游戏。',
-						},
-					},
-				};
-			},
-			methods: {
-				startPlay() {
-					this.state = 'started';
-				},
-				changeLanguage() {
-					// 动态切换语言
-					localStorage.setItem('language', this.language);
-				},
-				t(key) {
-					// 返回翻译文本
-					return this.translations[this.language][key] || key;
-				},
-			},
-			mounted() {
-				// 从浏览器或本地存储获取默认语言
-				const browserLang = navigator.language.startsWith('zh') ? 'zh' : 'en';
-				this.language = localStorage.getItem('language') || browserLang;
-			},
-		}).mount('#app');
-	</script>
 </body>
 </html>
