@@ -90,16 +90,26 @@ const loopTapApp = Vue.createApp({
             }
         },
 
-        checkBallInArc() {
-            const ballAngle = this.getBallAngle();
-            const tolerance = this.debugSettings.tapTolerance;
-            
-            const isInArc = 
-                (ballAngle + tolerance >= this.arc[0] && ballAngle - tolerance <= this.arc[1]) ||
-                (this.arc[1] > 360 && ballAngle + tolerance >= (this.arc[0] - 360) && ballAngle - tolerance <= (this.arc[1] - 360));
-            
-            return isInArc;
-        },
+checkBallInArc() {
+    const ballAngle = this.getBallAngle();
+    const tolerance = this.debugSettings.tapTolerance;
+    
+    // 处理跨360度的特殊情况
+    const normalizedArcStart = this.arc[0];
+    const normalizedArcEnd = this.arc[1] > 360 ? this.arc[1] - 360 : this.arc[1];
+    
+    // 调整角度计算逻辑
+    const isInArc = 
+        (ballAngle >= normalizedArcStart - tolerance && 
+         ballAngle <= normalizedArcEnd + tolerance) ||
+        (this.arc[1] > 360 && 
+         (ballAngle + 360 >= normalizedArcStart - tolerance && 
+          ballAngle + 360 <= normalizedArcEnd + tolerance));
+    
+    console.log('Ball Angle:', ballAngle, 'Arc Range:', this.arc, 'Is In Arc:', isInArc);
+    
+    return isInArc;
+},
 
         tap(e) {
             if (e) {
