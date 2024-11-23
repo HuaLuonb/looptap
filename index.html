@@ -1,189 +1,240 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<meta http-equiv="Cache-control" content="public" />
-		<meta
-			name="viewport"
-			content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
-		/>
-		<meta name="description" content="A minimal game to waste your time." />
-		<meta name="keywords" content="minimal game, html5 game, svg game" />
-		<meta name="apple-mobile-web-app-capable" content="yes" />
-		<meta name="mobile-web-app-capable" content="yes" />
-		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
-		<meta name="apple-mobile-web-app-title" content="Looptap" />
-		<meta name="application-name" content="Looptap" />
-		<meta name="theme-color" content="#fbf9f6" />
-		<meta property="og:url" content="https://vasanthv.github.io/looptap" />
-		<meta property="og:image" content="https://vasanthv.github.io/looptap/banner.png" />
-		<meta property="og:title" content="Looptap" />
-		<meta property="og:description" content="A minimal game to waste your time." />
-		<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-		<link rel="icon" href="favicon.svg" />
-		<link rel="manifest" href="manifest.json" />
-		<link rel="mask-icon" href="safari-pinned-tab.svg" color="#2c3d51" />
-		<meta name="msapplication-TileColor" content="#fbf9f6" />
-		<meta name="theme-color" content="#fbf9f6" />
-		<title>Looptap - A minimal game to waste your time</title>
+/* global Vue */
 
-		<link href="style.css" rel="stylesheet" />
-		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-		<script defer src="script.js"></script>
+const loopTapApp = Vue.createApp({
+    data() {
+        return {
+            arc: [180, 270],
+            taps: 0,
+            score: 0,
+            best: window.localStorage.best || 0,
+            state: "init",
+            prevTapTime: 0,
+            debugMode: true,
+            debugSettings: {
+                maxScore: 1000,
+                minScore: 0,
+                ballSize: 4,
+                rotationSpeed: 2000,
+                enable3DMode: false,
+                tapTolerance: 30
+            },
+            colors: [
+                "#ED5565", "#D9444F", "#ED5F56", "#DA4C43", "#F87D52", 
+                "#E7663F", "#FAB153", "#F59B43", "#FDCE55", "#F6BA43", 
+                "#C2D568", "#B1C353", "#99D469", "#83C251", "#42CB70", 
+                "#3CB85D", "#47CEC0", "#3BBEB0", "#4FC2E7", "#3CB2D9", 
+                "#5C9DED", "#4C8CDC", "#9398EC", "#7277D5", "#CC93EF", 
+                "#B377D9", "#ED87BF", "#D870AE"
+            ],
+        };
+    },
+    computed: {
+        arcDValue() {
+            return this.describeArc(50, 50, 40, this.arc[0], this.arc[1]);
+        },
+    },
+    methods: {
+        polarToCartesian(centerX, centerY, radius, angleInDegrees) {
+            const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
+            return {
+                x: centerX + radius * Math.cos(angleInRadians),
+                y: centerY + radius * Math.sin(angleInRadians),
+            };
+        },
 
-		<style>
-			#debug-panel {
-				position: fixed;
-				top: 10px;
-				right: 10px;
-				background: rgba(0,0,0,0.7);
-				color: white;
-				padding: 10px;
-				z-index: 1000;
-				border-radius: 8px;
-				width: 250px;
-			}
-			#debug-settings {
-				margin-top: 10px;
-			}
-			#debug-settings input {
-				width: 100%;
-				margin-bottom: 5px;
-			}
-		</style>
-	</head>
+        describeArc(x, y, radius, startAngle, endAngle) {
+            const start = this.polarToCartesian(x, y, radius, endAngle);
+            const end = this.polarToCartesian(x, y, radius, startAngle);
+            const arcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+            const d = ["M", start.x, start.y, "A", radius, radius, 0, arcFlag, 0, end.x, end.y].join(" ");
+            return d;
+        },
 
-	<body>
-		<div id="debug-panel">
-			<h3>调试信息</h3>
-			<div id="debug-info">
-				<p>状态: <span id="debug-state"></span></p>
-				<p>分数: <span id="debug-score"></span></p>
-				<p>点击次数: <span id="debug-taps"></span></p>
-				<p>颜色: <span id="debug-color"></span></p>
-			</div>
-			<div id="debug-settings">
-				<h4>调试设置</h4>
-				<input type="number" id="max-score" placeholder="最大分数" value="1000">
-				<input type="number" id="min-score" placeholder="最小分数" value="0">
-				<input type="number" id="ball-size" placeholder="球大小" value="4">
-				<input type="number" id="rotation-speed" placeholder="旋转速度" value="2000">
-				<label>
-					<input type="checkbox" id="3d-mode"> 3D模式
-				</label>
-				<button id="apply-debug-settings">应用设置</button>
-			</div>
-		</div>
+        getAngle(cx, cy, ex, ey) {
+            const dy = ey - cy;
+            const dx = ex - cx;
+            let theta = Math.atan2(dx, -dy);
+            theta *= 180 / Math.PI;
+            theta = theta < 0 ? theta + 360 : theta;
+            return theta;
+        },
 
-		<section id="canvas">
-			<div id="game" style="height: 80vh; display: flex">
-				<svg id="looptap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-					<rect id="bg" x="0" cy="0" height="100" width="100" fill="none" />
-					<text
-						x="50"
-						y="50"
-						dominant-baseline="middle"
-						text-anchor="middle"
-						class="score"
-						id="score"
-						v-if="state === 'started'"
-						v-html="score"
-					></text>
-					<text
-						x="50"
-						y="32"
-						text-anchor="middle"
-						class="score"
-						id="finalscore"
-						v-if="state === 'stopped'"
-						v-html="score"
-					></text>
-					<text
-						x="50"
-						y="70"
-						text-anchor="middle"
-						class="score"
-						id="best"
-						v-if="state === 'stopped'"
-						v-html="'Best: '+best"
-					></text>
-					<g id="tip" v-if="state === 'init'">
-						<text x="50" y="68" text-anchor="middle" class="tip">Tap anywhere / press spacebar when</text>
-						<text x="50" y="74" text-anchor="middle" class="tip">the ball is on the colored area.</text>
-					</g>
-					<path
-						id="arc"
-						fill="none"
-						v-bind:stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
-						stroke-width="10"
-						stroke-linejoin="round"
-						stroke-linecap="round"
-						v-bind:d="arcDValue"
-					/>
-					<circle
-						id="ball"
-						cx="50"
-						cy="50"
-						r="4"
-						fill="#2C3D51"
-						v-bind:class="state"
-						v-bind:style="'animation-duration: '+(2000 - taps * 5) + 'ms'"
-					/>
-					<polygon
-						id="play"
-						points="45,45 55,50 45,55"
-						fill="#2C3D51"
-						stroke="#2C3D51"
-						stroke-width="5"
-						stroke-linejoin="round"
-						stroke-linecap="round"
-						v-if="state !== 'started'"
-						v-on:click="startPlay"
-					/>
-				</svg>
-			</div>
-			<a
-				id="shareBtn"
-				v-bind:href="'https://twitter.com/intent/tweet?url=https%3A%2F%2Fvasanthv.github.io%2Flooptap%2F&text=Beat%20my%20score%3A%20'+score+'%0aLooptap%20-%20a%20minimal%20game%20to%20waste%20your%20time.&hashtags=looptap'"
-				v-if="['stopped', 'started'].includes(state)"
-				target="_blank"
-				v-bind:class="state === 'started' ? 'hide' : ''"
-			>
-				Share your score
-			</a>
-			<div id="about" v-if="state === 'init'">
-				Looptap is made by
-				<a href="https://twitter.com/vsnthv" target="_blank">Vasanth</a>
-				<br />
-				<a
-					href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-					class="twitter-share-button"
-					data-text="Looptap - a minimal game to waste your time."
-					data-url="https://vasanthv.github.io/looptap"
-					data-via="vsnthv"
-					data-hashtags="looptap"
-					data-show-count="false"
-					>Tweet</a
-				>
-				<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-			</div>
-		</section>
+        getBallAngle() {
+            const bg = document.getElementById("bg").getBoundingClientRect();
+            const bgCenter = { x: bg.left + bg.width / 2, y: bg.top + bg.height / 2 };
+            const ball = document.getElementById("ball").getBoundingClientRect();
+            const ballCenter = { x: ball.left + ball.width / 2, y: ball.top + ball.height / 2 };
+            return this.getAngle(bgCenter.x, bgCenter.y, ballCenter.x, ballCenter.y);
+        },
 
-		<script>
-			document.addEventListener('DOMContentLoaded', () => {
-				const applyDebugSettings = document.getElementById('apply-debug-settings');
-				applyDebugSettings.addEventListener('click', () => {
-					const debugSettings = {
-						maxScore: parseInt(document.getElementById('max-score').value) || 1000,
-						minScore: parseInt(document.getElementById('min-score').value) || 0,
-						ballSize: parseFloat(document.getElementById('ball-size').value) || 4,
-						rotationSpeed: parseInt(document.getElementById('rotation-speed').value) || 2000,
-						enable3DMode: document.getElementById('3d-mode').checked
-					};
+        setArc() {
+            const random = (i, j) => Math.floor(Math.random() * (j - i)) + i;
+            let arc = [];
+            arc.push(random(0, 300));
+            arc.push(random(arc[0] + 10, arc[0] + 110));
+            arc[1] = arc[1] > 360 ? 360 : arc[1];
+            this.arc = arc;
+        },
 
-					window.loopTapApp.enableDebugMode(debugSettings);
-				});
-			});
-		</script>
-	</body>
-</html>
+        startPlay() {
+            this.state = "started";
+            this.taps = 0;
+            this.score = 0;
+            this.prevTapTime = Date.now();
+        },
+
+        stopPlay() {
+            if (this.state === "started") {
+                this.state = "stopped";
+                if (this.score > this.best) window.localStorage.best = this.best = this.score;
+            }
+        },
+
+        checkBallInArc() {
+            const ballAngle = this.getBallAngle();
+            const tolerance = this.debugSettings.tapTolerance;
+            
+            const isInArc = 
+                (ballAngle + tolerance >= this.arc[0] && ballAngle - tolerance <= this.arc[1]) ||
+                (this.arc[1] > 360 && ballAngle + tolerance >= (this.arc[0] - 360) && ballAngle - tolerance <= (this.arc[1] - 360));
+            
+            return isInArc;
+        },
+
+        tap(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            if (e && (e.target.tagName === 'INPUT' || e.target.closest('#debug-panel'))) {
+                return false;
+            }
+
+            if (this.debugMode) {
+                if (this.score >= this.debugSettings.maxScore) {
+                    this.stopPlay();
+                    return false;
+                }
+                if (this.score <= this.debugSettings.minScore) {
+                    this.stopPlay();
+                    return false;
+                }
+            }
+
+            switch (this.state) {
+                case "init":
+                case "stopped":
+                    this.startPlay();
+                    break;
+                case "started":
+                    if (this.checkBallInArc()) {
+                        const currentTapTime = Date.now();
+                        const tapInterval = currentTapTime - this.prevTapTime;
+                        this.taps++;
+                        this.score = this.score + (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1);
+                        this.prevTapTime = currentTapTime;
+                        this.setArc();
+                    } else {
+                        this.stopPlay();
+                    }
+                    break;
+            }
+        },
+
+        enableDebugMode(settings = {}) {
+            this.debugMode = true;
+            this.debugSettings = { 
+                ...this.debugSettings, 
+                ...Object.fromEntries(
+                    Object.entries(settings).filter(([_, value]) => value !== undefined && value !== null)
+                )
+            };
+
+            console.log('Debug Settings Updated:', this.debugSettings);
+
+            const ball = document.getElementById('ball');
+            if (ball) {
+                ball.setAttribute('r', this.debugSettings.ballSize);
+                console.log('Ball Size Set:', this.debugSettings.ballSize);
+            }
+
+            const looptapElement = document.getElementById('looptap');
+            if (looptapElement) {
+                if (this.debugSettings.enable3DMode) {
+                    looptapElement.style.transform = 'perspective(500px) rotateX(45deg)';
+                    console.log('3D Mode Enabled');
+                } else {
+                    looptapElement.style.transform = 'none';
+                    console.log('3D Mode Disabled');
+                }
+            }
+
+            if (ball) {
+                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
+                console.log('Rotation Speed Set:', this.debugSettings.rotationSpeed);
+            }
+
+            const debugStateEl = document.getElementById('debug-state');
+            const debugScoreEl = document.getElementById('debug-score');
+            const debugTapsEl = document.getElementById('debug-taps');
+            const debugColorEl = document.getElementById('debug-color');
+
+            if (debugStateEl) debugStateEl.textContent = this.state;
+            if (debugScoreEl) debugScoreEl.textContent = this.score;
+            if (debugTapsEl) debugTapsEl.textContent = this.taps;
+            if (debugColorEl) {
+                debugColorEl.textContent = this.colors[Math.floor(this.score / 10)] || '未知';
+            }
+
+            if (settings.maxScore !== undefined) {
+                this.debugSettings.maxScore = Number(settings.maxScore);
+                console.log('Max Score Set:', this.debugSettings.maxScore);
+            }
+
+            if (settings.minScore !== undefined) {
+                this.debugSettings.minScore = Number(settings.minScore);
+                console.log('Min Score Set:', this.debugSettings.minScore);
+            }
+        }
+    },
+}).mount("#canvas");
+
+if ("ontouchstart" in window) {
+    window.addEventListener("touchstart", (e) => {
+        if (!e.target.closest('#debug-panel')) {
+            loopTapApp.tap(e);
+        }
+    }, { passive: false });
+} else {
+    window.addEventListener("mousedown", (e) => {
+        if (!e.target.closest('#debug-panel')) {
+            loopTapApp.tap(e);
+        }
+    }, { passive: false });
+}
+
+window.onkeydown = (e) => {
+    if (e.target.tagName !== 'INPUT' && e.code === 'Space') {
+        e.preventDefault();
+        
+        const ballAngle = loopTapApp.getBallAngle();
+        const currentArc = loopTapApp.arc;
+        
+        if (loopTapApp.state === 'started') {
+            if (loopTapApp.checkBallInArc()) {
+                loopTapApp.tap(e);
+            } else {
+                loopTapApp.stopPlay();
+            }
+        } else {
+            loopTapApp.tap(e);
+        }
+    }
+};
+
+window.loopTapApp = loopTapApp;
+
+if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js");
+}
