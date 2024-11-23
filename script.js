@@ -16,7 +16,7 @@ const loopTapApp = Vue.createApp({
                 ballSize: 4,
                 rotationSpeed: 2000,
                 enable3DMode: false,
-                tapTolerance: 60  // 增大容错范围
+                tapTolerance: 60
             },
             colors: [
                 "#ED5565", "#D9444F", "#ED5F56", "#DA4C43", "#F87D52", 
@@ -150,11 +150,64 @@ const loopTapApp = Vue.createApp({
             }
         },
 
-        // 其他方法保持不变
+        enableDebugMode(settings = {}) {
+            this.debugMode = true;
+            this.debugSettings = { 
+                ...this.debugSettings, 
+                ...Object.fromEntries(
+                    Object.entries(settings).filter(([_, value]) => value !== undefined && value !== null)
+                )
+            };
+
+            console.log('Debug Settings Updated:', this.debugSettings);
+
+            const ball = document.getElementById('ball');
+            if (ball) {
+                ball.setAttribute('r', this.debugSettings.ballSize);
+                console.log('Ball Size Set:', this.debugSettings.ballSize);
+            }
+
+            const looptapElement = document.getElementById('looptap');
+            if (looptapElement) {
+                if (this.debugSettings.enable3DMode) {
+                    looptapElement.style.transform = 'perspective(500px) rotateX(45deg)';
+                    console.log('3D Mode Enabled');
+                } else {
+                    looptapElement.style.transform = 'none';
+                    console.log('3D Mode Disabled');
+                }
+            }
+
+            if (ball) {
+                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
+                console.log('Rotation Speed Set:', this.debugSettings.rotationSpeed);
+            }
+
+            const debugStateEl = document.getElementById('debug-state');
+            const debugScoreEl = document.getElementById('debug-score');
+            const debugTapsEl = document.getElementById('debug-taps');
+            const debugColorEl = document.getElementById('debug-color');
+
+            if (debugStateEl) debugStateEl.textContent = this.state;
+            if (debugScoreEl) debugScoreEl.textContent = this.score;
+            if (debugTapsEl) debugTapsEl.textContent = this.taps;
+            if (debugColorEl) {
+                debugColorEl.textContent = this.colors[Math.floor(this.score / 10)] || '未知';
+            }
+
+            if (settings.maxScore !== undefined) {
+                this.debugSettings.maxScore = Number(settings.maxScore);
+                console.log('Max Score Set:', this.debugSettings.maxScore);
+            }
+
+            if (settings.minScore !== undefined) {
+                this.debugSettings.minScore = Number(settings.minScore);
+                console.log('Min Score Set:', this.debugSettings.minScore);
+            }
+        }
     },
 }).mount("#canvas");
 
-// 事件监听器保持不变
 if ("ontouchstart" in window) {
     window.addEventListener("touchstart", (e) => {
         if (!e.target.closest('#debug-panel')) {
