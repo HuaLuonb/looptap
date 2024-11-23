@@ -217,7 +217,6 @@ if ("ontouchstart" in window) {
 window.onkeydown = (e) => {
     if (e.target.tagName !== 'INPUT' && e.code === 'Space') {
         e.preventDefault();
-        
         const ballAngle = loopTapApp.getBallAngle();
         const currentArc = loopTapApp.arc;
         
