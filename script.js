@@ -90,12 +90,8 @@ const loopTapApp = Vue.createApp({
         },
 
         tap(e) {
-            // 阻止默认事件和冒泡
-            e.preventDefault();
-            e.stopPropagation();
-
-            // 如果是输入框或其他交互元素，不触发游戏逻辑
-            if (e.target.tagName === 'INPUT' || e.target.closest('#debug-panel')) {
+            // 如果是输入框，不触发游戏逻辑
+            if (e.target && (e.target.tagName === 'INPUT' || e.target.closest('#debug-panel'))) {
                 return;
             }
 
@@ -113,8 +109,8 @@ const loopTapApp = Vue.createApp({
 
             if (this.state === "started") {
                 const ballAngle = this.getBallAngle();
-                // 增加容错范围
-                if (ballAngle + 10 > this.arc[0] && ballAngle - 10 < this.arc[1]) {
+                // 增加更大的容错范围
+                if (ballAngle + 20 > this.arc[0] && ballAngle - 20 < this.arc[1]) {
                     const currentTapTime = Date.now();
                     const tapInterval = currentTapTime - this.prevTapTime;
                     this.taps++;
@@ -129,7 +125,6 @@ const loopTapApp = Vue.createApp({
             }
         },
 
-        // 新增调试模式方法
         enableDebugMode(settings = {}) {
             this.debugMode = true;
             this.debugSettings = { ...this.debugSettings, ...settings };
@@ -165,15 +160,35 @@ const loopTapApp = Vue.createApp({
 
 // 事件监听器调整
 if ("ontouchstart" in window) {
-    window.addEventListener("touchstart", (e) => loopTapApp.tap(e), { passive: false });
+    window.addEventListener("touchstart", (e) => {
+        if (!e.target.closest('#debug-panel')) {
+            loopTapApp.tap(e);
+        }
+    }, { passive: false });
 } else {
-    window.addEventListener("mousedown", (e) => loopTapApp.tap(e), { passive: false });
+    window.addEventListener("mousedown", (e) => {
+        if (!e.target.closest('#debug-panel')) {
+            loopTapApp.tap(e);
+        }
+    }, { passive: false });
 }
 
-window.onkeypress = (e) => {
+window.onkeydown = (e) => {
     // 避免在输入框时触发
-    if (e.target.tagName !== 'INPUT') {
-        if (e.keyCode == 32) {
+    if (e.target.tagName !== 'INPUT' && e.code === 'Space') {
+        e.preventDefault(); // 阻止空格默认行为
+        
+        // 检查球是否在得分区
+        const ballAngle = loopTapApp.getBallAngle();
+        const currentArc = loopTapApp.arc;
+        
+        if (loopTapApp.state === 'started') {
+            if (ballAngle + 20 > currentArc[0] && ballAngle - 20 < currentArc[1]) {
+                loopTapApp.tap(e);
+            } else {
+                loopTapApp.stopPlay();
+            }
+        } else {
             loopTapApp.tap(e);
         }
     }
