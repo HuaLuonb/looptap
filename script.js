@@ -8,9 +8,9 @@ const loopTapApp = Vue.createApp({
             best: window.localStorage.best || 0,
             state: "init",
             prevTapTime: 0,
-            debugMode: false,
-            debugPassword: '54188',
-            debugSettings: {
+            developerMode: false,
+            developerPassword: '54188',
+            developerSettings: {
                 ballSize: 4,
                 rotationSpeed: 2000,
                 autoPlay: false
@@ -104,31 +104,27 @@ const loopTapApp = Vue.createApp({
             }
         },
 
-        // 新增 Debug 模式切换方法
-        toggleDebugMode() {
-            const password = prompt('请输入 Debug 模式密码:');
-            if (password === this.debugPassword) {
-                this.debugMode = !this.debugMode;
-                alert(this.debugMode ? 'Debug 模式已开启' : 'Debug 模式已关闭');
+        toggleDeveloperMode() {
+            const password = prompt('请输入开发者模式密码:');
+            if (password === this.developerPassword) {
+                this.developerMode = !this.developerMode;
+                alert(this.developerMode ? '开发者模式已开启' : '开发者模式已关闭');
             } else {
                 alert('密码错误');
             }
         },
 
-        // 更新 Debug 设置
-        updateDebugSettings(setting, value) {
-            if (this.debugMode) {
-                this.debugSettings[setting] = Number(value);
+        updateDeveloperSettings(setting, value) {
+            if (this.developerMode) {
+                this.developerSettings[setting] = Number(value);
             }
         },
 
-        // 切换 3D 模式
         toggleThreeDMode() {
             this.threeDMode = !this.threeDMode;
             this.applyThreeDMode();
         },
 
-        // 应用 3D 模式效果
         applyThreeDMode() {
             const looptap = document.getElementById('looptap');
             if (this.threeDMode) {
@@ -139,9 +135,18 @@ const loopTapApp = Vue.createApp({
             }
         },
 
-        // 自动播放功能（仅在 Debug 模式）
+        resetDeveloperMode() {
+            this.developerSettings = {
+                ballSize: 4,
+                rotationSpeed: 2000,
+                autoPlay: false
+            };
+            this.threeDMode = false;
+            this.applyThreeDMode();
+        },
+
         autoPlay() {
-            if (this.debugMode && this.debugSettings.autoPlay) {
+            if (this.developerMode && this.developerSettings.autoPlay) {
                 const ballAngle = this.getBallAngle();
                 if (ballAngle + 6 > this.arc[0] && ballAngle - 6 < this.arc[1]) {
                     this.tap({ preventDefault: () => {}, stopPropagation: () => {} });
@@ -150,14 +155,6 @@ const loopTapApp = Vue.createApp({
         }
     },
     mounted() {
-        // 添加 Debug 模式切换监听器
-        document.addEventListener('keydown', (e) => {
-            if (e.altKey && e.key === 'D') {
-                this.toggleDebugMode();
-            }
-        });
-
-        // 如果启用了自动播放，则定期触发
         setInterval(() => {
             this.autoPlay();
         }, 500);
