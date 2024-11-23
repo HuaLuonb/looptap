@@ -34,6 +34,10 @@ const loopTapApp = Vue.createApp({
         },
     },
     methods: {
+        normalizeAngle(angle) {
+            return ((angle % 360) + 360) % 360;
+        },
+
         polarToCartesian(centerX, centerY, radius, angleInDegrees) {
             const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
             return {
@@ -67,6 +71,18 @@ const loopTapApp = Vue.createApp({
             return this.getAngle(bgCenter.x, bgCenter.y, ballCenter.x, ballCenter.y);
         },
 
+        checkBallInArc() {
+            const ballAngle = this.normalizeAngle(this.getBallAngle());
+            const arcStart = this.normalizeAngle(this.arc[0]);
+            const arcEnd = this.normalizeAngle(this.arc[1]);
+
+            if (arcStart > arcEnd) {
+                return (ballAngle >= arcStart || ballAngle <= arcEnd);
+            } else {
+                return (ballAngle >= arcStart && ballAngle <= arcEnd);
+            }
+        },
+
         setArc() {
             const random = (i, j) => Math.floor(Math.random() * (j - i)) + i;
             let arc = [];
@@ -89,27 +105,6 @@ const loopTapApp = Vue.createApp({
                 if (this.score > this.best) window.localStorage.best = this.best = this.score;
             }
         },
-
-checkBallInArc() {
-    const ballAngle = this.getBallAngle();
-    const tolerance = this.debugSettings.tapTolerance;
-    
-    // 处理跨360度的特殊情况
-    const normalizedArcStart = this.arc[0];
-    const normalizedArcEnd = this.arc[1] > 360 ? this.arc[1] - 360 : this.arc[1];
-    
-    // 调整角度计算逻辑
-    const isInArc = 
-        (ballAngle >= normalizedArcStart - tolerance && 
-         ballAngle <= normalizedArcEnd + tolerance) ||
-        (this.arc[1] > 360 && 
-         (ballAngle + 360 >= normalizedArcStart - tolerance && 
-          ballAngle + 360 <= normalizedArcEnd + tolerance));
-    
-    console.log('Ball Angle:', ballAngle, 'Arc Range:', this.arc, 'Is In Arc:', isInArc);
-    
-    return isInArc;
-},
 
         tap(e) {
             if (e) {
@@ -227,18 +222,7 @@ if ("ontouchstart" in window) {
 window.onkeydown = (e) => {
     if (e.target.tagName !== 'INPUT' && e.code === 'Space') {
         e.preventDefault();
-        const ballAngle = loopTapApp.getBallAngle();
-        const currentArc = loopTapApp.arc;
-        
-        if (loopTapApp.state === 'started') {
-            if (loopTapApp.checkBallInArc()) {
-                loopTapApp.tap(e);
-            } else {
-                loopTapApp.stopPlay();
-            }
-        } else {
-            loopTapApp.tap(e);
-        }
+        loopTapApp.tap(e);
     }
 };
 
