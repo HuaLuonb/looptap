@@ -1,5 +1,4 @@
 /* global Vue */
-
 const loopTapApp = Vue.createApp({
     data() {
         return {
@@ -10,42 +9,21 @@ const loopTapApp = Vue.createApp({
             state: "init",
             prevTapTime: 0,
             debugMode: false,
-            debugPanelOpen: false,
-            passwordEntered: false,
-            passwordInput: '',
-            correctPassword: '54188',
+            debugPassword: '54188',
             debugSettings: {
-                maxScore: 1000,
-                minScore: 0,
-                ballSize: 3,
-                ballColor: '#2C3D51',
-                arcWidth: 6,
-                arcColor: '#bdc3c7',
+                ballSize: 4,
                 rotationSpeed: 2000,
-                enable3DMode: false,
-                rotateX: 0,
-                rotateY: 0,
-                rotateZ: 0,
-                tapTolerance: 60,
-                customTolerance: 0,
-                ballTrail: false,
-                backgroundMusic: false,
-                soundEffects: true,
-                gameSpeed: 1,
-                randomColorMode: false
+                autoPlay: false
             },
+            threeDMode: false,
             colors: [
                 "#ED5565", "#D9444F", "#ED5F56", "#DA4C43", "#F87D52", 
                 "#E7663F", "#FAB153", "#F59B43", "#FDCE55", "#F6BA43", 
                 "#C2D568", "#B1C353", "#99D469", "#83C251", "#42CB70", 
                 "#3CB85D", "#47CEC0", "#3BBEB0", "#4FC2E7", "#3CB2D9", 
                 "#5C9DED", "#4C8CDC", "#9398EC", "#7277D5", "#CC93EF", 
-                "#B377D9", "#ED87BF", "#D870AE"
+                "#B377D9", "#ED87BF", "#D870AE",
             ],
-            audio: {
-                backgroundMusic: null,
-                tapSound: null
-            }
         };
     },
     computed: {
@@ -53,83 +31,7 @@ const loopTapApp = Vue.createApp({
             return this.describeArc(50, 50, 40, this.arc[0], this.arc[1]);
         },
     },
-    mounted() {
-        // 初始化音频
-        this.audio.backgroundMusic = new Audio('background.mp3');
-        this.audio.tapSound = new Audio('tap.mp3');
-    },
     methods: {
-        toggleBackgroundMusic() {
-            if (this.debugSettings.backgroundMusic) {
-                this.audio.backgroundMusic.play();
-            } else {
-                this.audio.backgroundMusic.pause();
-            }
-        },
-
-        playTapSound() {
-            if (this.debugSettings.soundEffects) {
-                this.audio.tapSound.play();
-            }
-        },
-
-        toggleDebugPanel() {
-            if (!this.passwordEntered) {
-                this.debugPanelOpen = true;
-            } else {
-                this.debugPanelOpen = !this.debugPanelOpen;
-            }
-        },
-
-        checkPassword() {
-            if (this.passwordInput === this.correctPassword) {
-                this.passwordEntered = true;
-                this.debugPanelOpen = true;
-                this.passwordInput = '';
-            } else {
-                alert('密码错误');
-                this.passwordInput = '';
-                this.debugPanelOpen = false;
-            }
-        },
-
-        applyDebugSettings() {
-            const ball = document.getElementById('ball');
-            const arc = document.getElementById('arc');
-            const looptapElement = document.getElementById('looptap');
-
-            if (ball) {
-                ball.setAttribute('r', this.debugSettings.ballSize);
-                ball.setAttribute('fill', this.debugSettings.ballColor);
-                
-                // 更新球的旋转速度
-                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
-            }
-
-            if (arc) {
-                arc.setAttribute('stroke', this.debugSettings.arcColor);
-                arc.setAttribute('stroke-width', this.debugSettings.arcWidth);
-            }
-
-            if (looptapElement) {
-                if (this.debugSettings.enable3DMode) {
-                    looptapElement.style.transform = `
-                        rotateX(${this.debugSettings.rotateX}deg) 
-                        rotateY(${this.debugSettings.rotateY}deg) 
-                        rotateZ(${this.debugSettings.rotateZ}deg)
-                    `;
-                } else {
-                    looptapElement.style.transform = 'none';
-                }
-            }
-
-            this.toggleBackgroundMusic();
-        },
-
-        normalizeAngle(angle) {
-            return ((angle % 360) + 360) % 360;
-        },
-
         polarToCartesian(centerX, centerY, radius, angleInDegrees) {
             const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
             return {
@@ -156,34 +58,11 @@ const loopTapApp = Vue.createApp({
         },
 
         getBallAngle() {
-            const ball = document.getElementById('ball');
-            const svg = document.getElementById('looptap');
-            const svgRect = svg.getBoundingClientRect();
-            const ballRect = ball.getBoundingClientRect();
-
-            const centerX = svgRect.left + svgRect.width / 2;
-            const centerY = svgRect.top + svgRect.height / 2;
-            const ballCenterX = ballRect.left + ballRect.width / 2;
-            const ballCenterY = ballRect.top + ballRect.height / 2;
-
-            return this.getAngle(centerX, centerY, ballCenterX, ballCenterY);
-        },
-
-        checkBallInArc() {
-            const ballAngle = this.normalizeAngle(this.getBallAngle());
-            const arcStart = this.normalizeAngle(this.arc[0]);
-            const arcEnd = this.normalizeAngle(this.arc[1]);
-            
-            const tolerance = this.debugSettings.tapTolerance + this.debugSettings.customTolerance;
-
-            if (arcStart > arcEnd) {
-                return (
-                    (ballAngle >= arcStart - tolerance && ballAngle <= 360) || 
-                    (ballAngle >= 0 && ballAngle <= arcEnd + tolerance)
-                );
-            } else {
-                return (ballAngle >= arcStart - tolerance && ballAngle <= arcEnd + tolerance);
-            }
+            const bg = document.getElementById("bg").getBoundingClientRect();
+            const bgCenter = { x: bg.left + bg.width / 2, y: bg.top + bg.height / 2 };
+            const ball = document.getElementById("ball").getBoundingClientRect();
+            const ballCenter = { x: ball.left + ball.width / 2, y: ball.top + ball.height / 2 };
+            return this.getAngle(bgCenter.x, bgCenter.y, ballCenter.x, ballCenter.y);
         },
 
         setArc() {
@@ -200,130 +79,105 @@ const loopTapApp = Vue.createApp({
             this.taps = 0;
             this.score = 0;
             this.prevTapTime = Date.now();
-            this.setArc();
-            
-            if (this.debugSettings.randomColorMode) {
-                this.colors = this.shuffleColors(this.colors);
-            }
-
-            // 强制触发球的旋转
-            const ball = document.getElementById('ball');
-            if (ball) {
-                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
-            }
-        },
-
-        shuffleColors(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
         },
 
         stopPlay() {
             if (this.state === "started") {
                 this.state = "stopped";
-                if (this.score > this.best) {
-                    window.localStorage.best = this.best = this.score;
-                }
+                if (this.score > this.best) window.localStorage.best = this.best = this.score;
             }
         },
 
         tap(e) {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            if (e && (e.target.tagName === 'INPUT' || e.target.closest('#debug-panel'))) {
-                return false;
-            }
-
-            switch (this.state) {
-                case "init":
-                case "stopped":
-                    this.startPlay();
-                    break;
-                case "started":
-                    const isInArc = this.checkBallInArc();
-
-                    if (isInArc) {
-                        const currentTapTime = Date.now();
-                        const tapInterval = currentTapTime - this.prevTapTime;
-                        this.taps++;
-                        this.score += (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1);
-                        this.prevTapTime = currentTapTime;
-                        this.setArc();
-                        this.playTapSound();
-                    } else {
-                        this.stopPlay();
-                    }
-                    break;
+            e.preventDefault();
+            e.stopPropagation();
+            if (this.state === "started") {
+                const ballAngle = this.getBallAngle();
+                if (ballAngle + 6 > this.arc[0] && ballAngle - 6 < this.arc[1]) {
+                    const currentTapTime = Date.now();
+                    const tapInterval = currentTapTime - this.prevTapTime;
+                    this.taps++;
+                    this.score = this.score + (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1);
+                    this.prevTapTime = currentTapTime;
+                    this.setArc();
+                } else this.stopPlay();
             }
         },
 
-        enableDebugMode(settings = {}) {
-            this.debugMode = true;
-            this.debugSettings = { 
-                ...this.debugSettings, 
-                ...Object.fromEntries(
-                    Object.entries(settings).filter(([_, value]) => value !== undefined && value !== null)
-                )
-            };
-
-            if (settings.maxScore !== undefined) {
-                this.best = Number(settings.maxScore);
-                window.localStorage.best = this.best;
+        // 新增 Debug 模式切换方法
+        toggleDebugMode() {
+            const password = prompt('请输入 Debug 模式密码:');
+            if (password === this.debugPassword) {
+                this.debugMode = !this.debugMode;
+                alert(this.debugMode ? 'Debug 模式已开启' : 'Debug 模式已关闭');
+            } else {
+                alert('密码错误');
             }
+        },
 
-            if (settings.minScore !== undefined) {
-                this.debugSettings.minScore = Number(settings.minScore);
+        // 更新 Debug 设置
+        updateDebugSettings(setting, value) {
+            if (this.debugMode) {
+                this.debugSettings[setting] = Number(value);
             }
+        },
 
-            const ball = document.getElementById('ball');
-            if (ball) {
-                ball.setAttribute('r', this.debugSettings.ballSize);
+        // 切换 3D 模式
+        toggleThreeDMode() {
+            this.threeDMode = !this.threeDMode;
+            this.applyThreeDMode();
+        },
+
+        // 应用 3D 模式效果
+        applyThreeDMode() {
+            const looptap = document.getElementById('looptap');
+            if (this.threeDMode) {
+                looptap.style.transform = 'perspective(500px) rotateX(20deg) rotateY(20deg)';
+                looptap.style.transition = 'transform 0.5s';
+            } else {
+                looptap.style.transform = 'none';
             }
+        },
 
-            const looptapElement = document.getElementById('looptap');
-            if (looptapElement) {
-                if (this.debugSettings.enable3DMode) {
-                    looptapElement.style.transform = 'perspective(500px) rotateX(45deg)';
-                } else {
-                    looptapElement.style.transform = 'none';
+        // 自动播放功能（仅在 Debug 模式）
+        autoPlay() {
+            if (this.debugMode && this.debugSettings.autoPlay) {
+                const ballAngle = this.getBallAngle();
+                if (ballAngle + 6 > this.arc[0] && ballAngle - 6 < this.arc[1]) {
+                    this.tap({ preventDefault: () => {}, stopPropagation: () => {} });
                 }
-            }
-
-            if (ball) {
-                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
             }
         }
     },
+    mounted() {
+        // 添加 Debug 模式切换监听器
+        document.addEventListener('keydown', (e) => {
+            if (e.altKey && e.key === 'D') {
+                this.toggleDebugMode();
+            }
+        });
+
+        // 如果启用了自动播放，则定期触发
+        setInterval(() => {
+            this.autoPlay();
+        }, 500);
+    }
 }).mount("#canvas");
 
 if ("ontouchstart" in window) {
-    window.addEventListener("touchstart", (e) => {
-        if (!e.target.closest('#debug-panel')) {
-            loopTapApp.tap(e);
-        }
-    }, { passive: false });
+    window.addEventListener("touchstart", loopTapApp.tap);
 } else {
-    window.addEventListener("mousedown", (e) => {
-        if (!e.target.closest('#debug-panel')) {
-            loopTapApp.tap(e);
+    window.addEventListener("mousedown", loopTapApp.tap);
+    window.onkeypress = (e) => {
+        if (e.keyCode == 32) {
+            if (loopTapApp.state === "stopped") {
+                loopTapApp.startPlay();
+            } else {
+                loopTapApp.tap(e);
+            }
         }
-    }, { passive: false });
+    };
 }
-
-window.onkeydown = (e) => {
-    if (e.target.tagName !== 'INPUT' && e.code === 'Space') {
-        e.preventDefault();
-        loopTapApp.tap(e);
-    }
-};
-
-window.loopTapApp = loopTapApp;
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js");
