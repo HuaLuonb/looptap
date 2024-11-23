@@ -40,13 +40,12 @@ const loopTapApp = Vue.createApp({
     },
     methods: {
         toggleDebugPanel() {
-toggleDebugPanel() {
-    if (!this.passwordEntered) {
-        this.debugPanelOpen = true;
-    } else {
-        this.debugPanelOpen = !this.debugPanelOpen;
-    }
-},
+            if (!this.passwordEntered) {
+                this.debugPanelOpen = true;
+            } else {
+                this.debugPanelOpen = !this.debugPanelOpen;
+            }
+        },
 
         checkPassword() {
             if (this.passwordInput === this.correctPassword) {
@@ -56,6 +55,7 @@ toggleDebugPanel() {
             } else {
                 alert('密码错误');
                 this.passwordInput = '';
+                this.debugPanelOpen = false;
             }
         },
 
@@ -133,6 +133,7 @@ toggleDebugPanel() {
             this.taps = 0;
             this.score = 0;
             this.prevTapTime = Date.now();
+            this.setArc(); // 初始化弧形区域
         },
 
         stopPlay() {
