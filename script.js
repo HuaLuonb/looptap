@@ -18,8 +18,14 @@ const loopTapApp = Vue.createApp({
                 maxScore: 1000,
                 minScore: 0,
                 ballSize: 4,
+                ballColor: '#2C3D51',
+                arcWidth: 10,
+                arcColor: '#bdc3c7',
                 rotationSpeed: 2000,
                 enable3DMode: false,
+                rotateX: 0,
+                rotateY: 0,
+                rotateZ: 0,
                 tapTolerance: 60,
                 customTolerance: 0
             },
@@ -56,6 +62,41 @@ const loopTapApp = Vue.createApp({
                 alert('密码错误');
                 this.passwordInput = '';
                 this.debugPanelOpen = false;
+            }
+        },
+
+        applyDebugSettings() {
+            // 应用球设置
+            const ball = document.getElementById('ball');
+            if (ball) {
+                ball.setAttribute('r', this.debugSettings.ballSize);
+                ball.setAttribute('fill', this.debugSettings.ballColor);
+            }
+
+            // 应用弧线设置
+            const arc = document.getElementById('arc');
+            if (arc) {
+                arc.setAttribute('stroke', this.debugSettings.arcColor);
+                arc.setAttribute('stroke-width', this.debugSettings.arcWidth);
+            }
+
+            // 应用3D效果
+            const looptapElement = document.getElementById('looptap');
+            if (looptapElement) {
+                if (this.debugSettings.enable3DMode) {
+                    looptapElement.style.transform = `
+                        rotateX(${this.debugSettings.rotateX}deg) 
+                        rotateY(${this.debugSettings.rotateY}deg) 
+                        rotateZ(${this.debugSettings.rotateZ}deg)
+                    `;
+                } else {
+                    looptapElement.style.transform = 'none';
+                }
+            }
+
+            // 应用旋转速度
+            if (ball) {
+                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
             }
         },
 
@@ -133,7 +174,7 @@ const loopTapApp = Vue.createApp({
             this.taps = 0;
             this.score = 0;
             this.prevTapTime = Date.now();
-            this.setArc(); // 初始化弧形区域
+            this.setArc();
         },
 
         stopPlay() {
@@ -174,42 +215,6 @@ const loopTapApp = Vue.createApp({
                     break;
             }
         },
-
-        enableDebugMode(settings = {}) {
-            this.debugMode = true;
-            this.debugSettings = { 
-                ...this.debugSettings, 
-                ...Object.fromEntries(
-                    Object.entries(settings).filter(([_, value]) => value !== undefined && value !== null)
-                )
-            };
-
-            if (settings.maxScore !== undefined) {
-                this.debugSettings.maxScore = Number(settings.maxScore);
-            }
-
-            if (settings.minScore !== undefined) {
-                this.debugSettings.minScore = Number(settings.minScore);
-            }
-
-            const ball = document.getElementById('ball');
-            if (ball) {
-                ball.setAttribute('r', this.debugSettings.ballSize);
-            }
-
-            const looptapElement = document.getElementById('looptap');
-            if (looptapElement) {
-                if (this.debugSettings.enable3DMode) {
-                    looptapElement.style.transform = 'perspective(500px) rotateX(45deg)';
-                } else {
-                    looptapElement.style.transform = 'none';
-                }
-            }
-
-            if (ball) {
-                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
-            }
-        }
     },
 }).mount("#canvas");
 
