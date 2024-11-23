@@ -90,9 +90,15 @@ const loopTapApp = Vue.createApp({
         },
 
         tap(e) {
+            // 阻止默认事件和冒泡
             e.preventDefault();
             e.stopPropagation();
-            
+
+            // 如果是输入框或其他交互元素，不触发游戏逻辑
+            if (e.target.tagName === 'INPUT' || e.target.closest('#debug-panel')) {
+                return;
+            }
+
             // 调试模式下的特殊处理
             if (this.debugMode) {
                 if (this.score >= this.debugSettings.maxScore) {
@@ -107,15 +113,19 @@ const loopTapApp = Vue.createApp({
 
             if (this.state === "started") {
                 const ballAngle = this.getBallAngle();
-                // adding a 6 for better accuracy as the arc stroke extends beyond the angle.
-                if (ballAngle + 6 > this.arc[0] && ballAngle - 6 < this.arc[1]) {
+                // 增加容错范围
+                if (ballAngle + 10 > this.arc[0] && ballAngle - 10 < this.arc[1]) {
                     const currentTapTime = Date.now();
                     const tapInterval = currentTapTime - this.prevTapTime;
                     this.taps++;
                     this.score = this.score + (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1);
                     this.prevTapTime = currentTapTime;
                     this.setArc();
-                } else this.stopPlay();
+                } else {
+                    this.stopPlay();
+                }
+            } else if (this.state === "init" || this.state === "stopped") {
+                this.startPlay();
             }
         },
 
@@ -142,27 +152,35 @@ const loopTapApp = Vue.createApp({
             if (ballElement) {
                 ballElement.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
             }
+
+            // 更新调试面板信息
+            document.getElementById('debug-state').textContent = this.state;
+            document.getElementById('debug-score').textContent = this.score;
+            document.getElementById('debug-taps').textContent = this.taps;
+            document.getElementById('debug-color').textContent = 
+                this.colors[Math.floor(this.score / 10)] || '未知';
         }
     },
 }).mount("#canvas");
 
-// 将loopTapApp挂载到window对象，以便在外部调用
-window.loopTapApp = loopTapApp;
-
+// 事件监听器调整
 if ("ontouchstart" in window) {
-    window.addEventListener("touchstart", loopTapApp.tap);
+    window.addEventListener("touchstart", (e) => loopTapApp.tap(e), { passive: false });
 } else {
-    window.addEventListener("mousedown", loopTapApp.tap);
-    window.onkeypress = (e) => {
-        if (e.keyCode == 32) {
-            if (loopTapApp.state === "stopped") {
-                loopTapApp.startPlay();
-            } else {
-                loopTapApp.tap(e);
-            }
-        }
-    };
+    window.addEventListener("mousedown", (e) => loopTapApp.tap(e), { passive: false });
 }
+
+window.onkeypress = (e) => {
+    // 避免在输入框时触发
+    if (e.target.tagName !== 'INPUT') {
+        if (e.keyCode == 32) {
+            loopTapApp.tap(e);
+        }
+    }
+};
+
+// 将loopTapApp挂载到window对象
+window.loopTapApp = loopTapApp;
 
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("/sw.js");
