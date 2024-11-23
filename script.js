@@ -104,19 +104,30 @@ const loopTapApp = Vue.createApp({
             }
         },
 
-        toggleDeveloperMode() {
-            const password = prompt('请输入开发者模式密码:');
-            if (password === this.developerPassword) {
-                this.developerMode = !this.developerMode;
-                alert(this.developerMode ? '开发者模式已开启' : '开发者模式已关闭');
-            } else {
-                alert('密码错误');
+        updateBallSize(event) {
+            const value = Number(event.target.value);
+            if (value >= 1 && value <= 10) {
+                this.developerSettings.ballSize = value;
             }
         },
 
-        updateDeveloperSettings(setting, value) {
-            if (this.developerMode) {
-                this.developerSettings[setting] = Number(value);
+        updateRotationSpeed(event) {
+            const value = Number(event.target.value);
+            if (value >= 500 && value <= 5000) {
+                this.developerSettings.rotationSpeed = value;
+            }
+        },
+
+        closeDeveloperMode() {
+            this.developerMode = false;
+        },
+
+        toggleDeveloperMode() {
+            const password = prompt('请输入开发者模式密码:');
+            if (password === this.developerPassword) {
+                this.developerMode = true;
+            } else {
+                alert('密码错误');
             }
         },
 
