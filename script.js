@@ -127,11 +127,21 @@ const loopTapApp = Vue.createApp({
 
         applyThreeDMode() {
             const looptap = document.getElementById('looptap');
+            const ball = document.getElementById('ball');
+            const arc = document.getElementById('arc');
+
             if (this.threeDMode) {
-                looptap.style.transform = 'perspective(500px) rotateX(20deg) rotateY(20deg)';
+                // 更复杂的 3D 效果
+                looptap.style.transform = 'perspective(500px) rotateX(45deg) rotateY(20deg) scale(1.2)';
                 looptap.style.transition = 'transform 0.5s';
+                
+                // 球体和弧线添加 3D 效果
+                ball.style.filter = 'drop-shadow(3px 3px 3px rgba(0,0,0,0.5))';
+                arc.style.filter = 'drop-shadow(2px 2px 2px rgba(0,0,0,0.3))';
             } else {
                 looptap.style.transform = 'none';
+                ball.style.filter = 'none';
+                arc.style.filter = 'none';
             }
         },
 
