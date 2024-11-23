@@ -15,7 +15,8 @@ const loopTapApp = Vue.createApp({
                 minScore: 0,
                 ballSize: 4,
                 rotationSpeed: 2000,
-                enable3DMode: false
+                enable3DMode: false,
+                tapTolerance: 30  // 新增容错角度
             },
             colors: [
                 "#ED5565", "#D9444F", "#ED5F56", "#DA4C43", "#F87D52", 
@@ -89,39 +90,60 @@ const loopTapApp = Vue.createApp({
             }
         },
 
+        checkBallInArc() {
+            const ballAngle = this.getBallAngle();
+            const tolerance = this.debugSettings.tapTolerance;
+            
+            // 考虑角度循环
+            const isInArc = 
+                (ballAngle + tolerance >= this.arc[0] && ballAngle - tolerance <= this.arc[1]) ||
+                (this.arc[1] > 360 && ballAngle + tolerance >= (this.arc[0] - 360) && ballAngle - tolerance <= (this.arc[1] - 360));
+            
+            return isInArc;
+        },
+
         tap(e) {
+            // 阻止默认事件
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
             // 如果是输入框，不触发游戏逻辑
-            if (e.target && (e.target.tagName === 'INPUT' || e.target.closest('#debug-panel'))) {
-                return;
+            if (e && (e.target.tagName === 'INPUT' || e.target.closest('#debug-panel'))) {
+                return false;
             }
 
             // 调试模式下的特殊处理
             if (this.debugMode) {
                 if (this.score >= this.debugSettings.maxScore) {
                     this.stopPlay();
-                    return;
+                    return false;
                 }
                 if (this.score <= this.debugSettings.minScore) {
                     this.stopPlay();
-                    return;
+                    return false;
                 }
             }
 
-            if (this.state === "started") {
-                const ballAngle = this.getBallAngle();
-                // 增加更大的容错范围
-                if (ballAngle + 20 > this.arc[0] && ballAngle - 20 < this.arc[1]) {
-                    const currentTapTime = Date.now();
-                    const tapInterval = currentTapTime - this.prevTapTime;
-                    this.taps++;
-                    this.score = this.score + (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1);
-                    this.prevTapTime = currentTapTime;
-                    this.setArc();
-                } else {
-                    this.stopPlay();
-                }
-            } else if (this.state === "init" || this.state === "stopped") {
-                this.startPlay();
+            // 游戏状态处理
+            switch (this.state) {
+                case "init":
+                case "stopped":
+                    this.startPlay();
+                    break;
+                case "started":
+                    if (this.checkBallInArc()) {
+                        const currentTapTime = Date.now();
+                        const tapInterval = currentTapTime - this.prevTapTime;
+                        this.taps++;
+                        this.score = this.score + (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1);
+                        this.prevTapTime = currentTapTime;
+                        this.setArc();
+                    } else {
+                        this.stopPlay();
+                    }
+                    break;
             }
         },
 
@@ -183,7 +205,7 @@ window.onkeydown = (e) => {
         const currentArc = loopTapApp.arc;
         
         if (loopTapApp.state === 'started') {
-            if (ballAngle + 20 > currentArc[0] && ballAngle - 20 < currentArc[1]) {
+            if (loopTapApp.checkBallInArc()) {
                 loopTapApp.tap(e);
             } else {
                 loopTapApp.stopPlay();
