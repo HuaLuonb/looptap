@@ -101,13 +101,9 @@ const loopTapApp = Vue.createApp({
             if (ball) {
                 ball.setAttribute('r', this.debugSettings.ballSize);
                 ball.setAttribute('fill', this.debugSettings.ballColor);
-                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
                 
-                // 强制重新触发动画
-                ball.style.animation = 'none';
-                setTimeout(() => {
-                    ball.style.animation = `rotate ${this.debugSettings.rotationSpeed}ms linear infinite`;
-                }, 10);
+                // 更新球的旋转速度
+                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
             }
 
             if (arc) {
@@ -210,15 +206,10 @@ const loopTapApp = Vue.createApp({
                 this.colors = this.shuffleColors(this.colors);
             }
 
-            // 强制触发球的旋转动画
+            // 强制触发球的旋转
             const ball = document.getElementById('ball');
             if (ball) {
                 ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
-                ball.style.animation = 'none';
-                requestAnimationFrame(() => {
-                    ball.style.animation = 'rotate linear infinite';
-                    ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
-                });
             }
         },
 
