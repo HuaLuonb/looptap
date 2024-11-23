@@ -160,21 +160,76 @@
                     color: white; 
                     padding: 15px; 
                     z-index: 999;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
                 "
             >
                 <h3>开发者模式设置</h3>
-                <div>
-                    <label>球大小: 
-                        <input type="number" :value="developerSettings.ballSize" @input="updateDeveloperSettings('ballSize', $event.target.value)" min="1" max="10">
-                    </label>
-                    <label>旋转速度: 
-                        <input type="number" :value="developerSettings.rotationSpeed" @input="updateDeveloperSettings('rotationSpeed', $event.target.value)" min="500" max="5000">
-                    </label>
-                    <label>自动播放: 
-                        <input type="checkbox" :checked="developerSettings.autoPlay" @change="developerSettings.autoPlay = !developerSettings.autoPlay">
-                    </label>
-                    <button @click="toggleThreeDMode">切换 3D 模式</button>
-                    <button @click="resetDeveloperMode">重置设置</button>
+                <div style="display: flex; flex-direction: column; gap: 10px; width: 80%;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label>球大小:</label>
+                        <input 
+                            type="range" 
+                            :value="developerSettings.ballSize" 
+                            @input="updateDeveloperSettings('ballSize', $event.target.value)" 
+                            min="1" 
+                            max="10" 
+                            step="0.5"
+                            style="width: 200px;"
+                        >
+                        <span>{{ developerSettings.ballSize }}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label>旋转速度:</label>
+                        <input 
+                            type="range" 
+                            :value="developerSettings.rotationSpeed" 
+                            @input="updateDeveloperSettings('rotationSpeed', $event.target.value)" 
+                            min="500" 
+                            max="5000"
+                            step="100"
+                            style="width: 200px;"
+                        >
+                        <span>{{ developerSettings.rotationSpeed }}</span>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label>自动播放:</label>
+                        <input 
+                            type="checkbox" 
+                            :checked="developerSettings.autoPlay" 
+                            @change="developerSettings.autoPlay = !developerSettings.autoPlay"
+                        >
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button 
+                        @click="toggleThreeDMode" 
+                        style="
+                            background-color: #4CAF50; 
+                            color: white; 
+                            border: none; 
+                            padding: 10px 20px; 
+                            border-radius: 5px;
+                        "
+                    >
+                        {{ threeDMode ? '关闭3D模式' : '开启3D模式' }}
+                    </button>
+                    <button 
+                        @click="resetDeveloperMode"
+                        style="
+                            background-color: #f44336; 
+                            color: white; 
+                            border: none; 
+                            padding: 10px 20px; 
+                            border-radius: 5px;
+                        "
+                    >
+                        重置设置
+                    </button>
                 </div>
             </div>
         </section>
