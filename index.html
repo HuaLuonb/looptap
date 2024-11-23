@@ -35,7 +35,7 @@
 			#debug-panel {
 				position: fixed;
 				top: 10px;
-				right: 10px;
+				right: -300px; /* 默认隐藏 */
 				background: rgba(0,0,0,0.8);
 				color: white;
 				padding: 15px;
@@ -43,12 +43,41 @@
 				border-radius: 12px;
 				width: 280px;
 				box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-				transition: all 0.3s ease;
+				transition: right 0.3s ease;
 			}
-			#debug-settings {
+
+			#debug-panel.open {
+				right: 10px; /* 打开时显示 */
+			}
+
+			.password-section {
+				display: flex;
+				gap: 10px;
+			}
+
+			.password-section input {
+				flex-grow: 1;
+				padding: 8px;
+				border-radius: 6px;
+				border: 1px solid #444;
+				background: #333;
+				color: white;
+			}
+
+			.password-section button {
+				padding: 8px 15px;
+				background: #4CAF50;
+				color: white;
+				border: none;
+				border-radius: 6px;
+				cursor: pointer;
+			}
+
+			.debug-settings {
 				margin-top: 15px;
 			}
-			#debug-settings input {
+
+			.debug-settings input {
 				width: 100%;
 				margin-bottom: 10px;
 				padding: 8px;
@@ -57,7 +86,8 @@
 				background: #333;
 				color: white;
 			}
-			.debug-btn {
+
+			.debug-settings button {
 				width: 100%;
 				padding: 10px;
 				background: #4CAF50;
@@ -67,91 +97,30 @@
 				cursor: pointer;
 				transition: background 0.3s ease;
 			}
-			.debug-btn:hover {
-				background: #45a049;
-			}
-			#3d-mode-container {
-				display: flex;
-				align-items: center;
-				margin-bottom: 10px;
-			}
-			#3d-mode-container label {
-				margin-left: 10px;
+
+			.debug-toggle-btn {
+				position: fixed;
+				top: 10px;
+				right: 10px;
+				z-index: 1001;
+				padding: 8px 15px;
+				background: #2196F3;
+				color: white;
+				border: none;
+				border-radius: 6px;
+				cursor: pointer;
 			}
 		</style>
 	</head>
 
 	<body>
-		<div id="debug-panel">
-			<h3>调试信息</h3>
-			<div id="debug-info">
-				<p>状态: <span id="debug-state"></span></p>
-				<p>分数: <span id="debug-score"></span></p>
-				<p>点击次数: <span id="debug-taps"></span></p>
-				<p>颜色: <span id="debug-color"></span></p>
-			</div>
-			<div id="debug-settings">
-				<h4>调试设置</h4>
-				<div>
-					<input type="number" id="max-score" placeholder="最大分数" value="1000">
-					<button id="max-score-btn" class="debug-btn">确定最大分数</button>
-				</div>
-				<div>
-					<input type="number" id="min-score" placeholder="最小分数" value="0">
-					<button id="min-score-btn" class="debug-btn">确定最小分数</button>
-				</div>
-				<div>
-					<input type="number" id="ball-size" placeholder="球大小" value="4">
-					<button id="ball-size-btn" class="debug-btn">确定球大小</button>
-				</div>
-				<div>
-					<input type="number" id="rotation-speed" placeholder="旋转速度" value="2000">
-					<button id="rotation-speed-btn" class="debug-btn">确定旋转速度</button>
-				</div>
-				<div id="3d-mode-container">
-					<input type="checkbox" id="3d-mode">
-					<label for="3d-mode">3D模式</label>
-				</div>
-				<button id="3d-mode-btn" class="debug-btn">确定3D模式</button>
-			</div>
-		</div>
-
-		<section id="canvas">
-			<div id="game" style="height: 80vh; display: flex">
-				<svg id="looptap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-					<rect id="bg" x="0" cy="0" height="100" width="100" fill="none" />
-					<text
-						x="50"
-						y="50"
-						dominant-baseline="middle"
-						text-anchor="middle"
-						class="score"
-						id="score"
-						v-if="state === 'started'"
-						v-html="score"
-					></text>
-					<text
-						x="50"
-						y="32"
-						text-anchor="middle"
-						class="score"
-						id="finalscore"
-						v-if="state === 'stopped'"
-						v-html="score"
-					></text>
-					<text
-						x="50"
-						y="70"
-						text-anchor="middle"
-						class="score"
-						id="best"
-						v-if="state === 'stopped'"
-						v-html="'Best: '+best"
-					></text>
-					<g id="tip" v-if="state === 'init'">
-						<text x="50" y="68" text-anchor="middle" class="tip">Tap anywhere / press spacebar when</text>
-						<text x="50" y="74" text-anchor="middle" class="tip">the ball is on the colored area.</text>
-					</g>
+		<div id="canvas">
+			<div id="looptap">
+				<svg 
+					id="bg" 
+					viewBox="0 0 100 100" 
+					xmlns="http://www.w3.org/2000/svg"
+				>
 					<path
 						id="arc"
 						fill="none"
@@ -183,77 +152,47 @@
 					/>
 				</svg>
 			</div>
-			<a
-				id="shareBtn"
-				v-bind:href="'https://twitter.com/intent/tweet?url=https%3A%2F%2Fvasanthv.github.io%2Flooptap%2F&text=Beat%20my%20score%3A%20'+score+'%0aLooptap%20-%20a%20minimal%20game%20to%20waste%20your%20time.&hashtags=looptap'"
-				v-if="['stopped', 'started'].includes(state)"
-				target="_blank"
-				v-bind:class="state === 'started' ? 'hide' : ''"
-			>
-				Share your score
-			</a>
-			<div id="about" v-if="state === 'init'">
-				Looptap is made by
-				<a href="https://twitter.com/vsnthv" target="_blank">Vasanth</a>
-				<br />
-				<a
-					href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-					class="twitter-share-button"
-					data-text="Looptap - a minimal game to waste your time."
-					data-url="https://vasanthv.github.io/looptap"
-					data-via="vsnthv"
-					data-hashtags="looptap"
-					data-show-count="false"
-					>Tweet</a
-				>
-				<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+
+			<button @click="toggleDebugPanel" class="debug-toggle-btn">
+				{{ debugPanelOpen ? '关闭' : '打开' }}调试
+			</button>
+
+			<div id="debug-panel" :class="{ 'open': debugPanelOpen }">
+				<div v-if="!passwordEntered" class="password-section">
+					<input 
+						type="password" 
+						v-model="passwordInput" 
+						placeholder="输入密码" 
+						@keyup.enter="checkPassword"
+					>
+					<button @click="checkPassword">确认</button>
+				</div>
+				
+				<div v-else>
+					<h3>调试信息</h3>
+					<div>
+						<p>状态: {{ state }}</p>
+						<p>分数: {{ score }}</p>
+						<p>点击次数: {{ taps }}</p>
+						<p>颜色: {{ colors[Math.floor(score / 10)] || '未知' }}</p>
+					</div>
+
+					<div class="debug-settings">
+						<div>
+							<input type="number" v-model.number="debugSettings.maxScore" placeholder="最大分数">
+							<button @click="enableDebugMode({ maxScore: debugSettings.maxScore })">设置最大分数</button>
+						</div>
+						<div>
+							<input type="number" v-model.number="debugSettings.minScore" placeholder="最小分数">
+							<button @click="enableDebugMode({ minScore: debugSettings.minScore })">设置最小分数</button>
+						</div>
+						<div>
+							<input type="number" v-model.number="debugSettings.customTolerance" placeholder="自定义容错率">
+							<p>当前容错率: {{ debugSettings.tapTolerance + debugSettings.customTolerance }}</p>
+						</div>
+					</div>
+				</div>
 			</div>
-		</section>
-
-		<script>
-			document.addEventListener('DOMContentLoaded', () => {
-				const debugSettings = {
-					maxScore: undefined,
-					minScore: undefined,
-					ballSize: undefined,
-					rotationSpeed: undefined,
-					enable3DMode: false
-				};
-
-				// 最大分数
-				document.getElementById('max-score-btn').addEventListener('click', () => {
-					const value = document.getElementById('max-score').value;
-					debugSettings.maxScore = value !== '' ? Number(value) : undefined;
-					window.loopTapApp.enableDebugMode(debugSettings);
-				});
-
-				// 最小分数
-				document.getElementById('min-score-btn').addEventListener('click', () => {
-					const value = document.getElementById('min-score').value;
-					debugSettings.minScore = value !== '' ? Number(value) : undefined;
-					window.loopTapApp.enableDebugMode(debugSettings);
-				});
-
-				// 球大小
-				document.getElementById('ball-size-btn').addEventListener('click', () => {
-					const value = document.getElementById('ball-size').value;
-					debugSettings.ballSize = value !== '' ? Number(value) : undefined;
-					window.loopTapApp.enableDebugMode(debugSettings);
-				});
-
-				// 旋转速度
-				document.getElementById('rotation-speed-btn').addEventListener('click', () => {
-					const value = document.getElementById('rotation-speed').value;
-					debugSettings.rotationSpeed = value !== '' ? Number(value) : undefined;
-					window.loopTapApp.enableDebugMode(debugSettings);
-				});
-
-				// 3D模式
-				document.getElementById('3d-mode-btn').addEventListener('click', () => {
-					debugSettings.enable3DMode = document.getElementById('3d-mode').checked;
-					window.loopTapApp.enableDebugMode(debugSettings);
-				});
-			});
-		</script>
+		</div>
 	</body>
 </html>
