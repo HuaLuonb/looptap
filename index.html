@@ -210,48 +210,24 @@
 			</div>
 		</section>
 
-		<script>
-			document.addEventListener('DOMContentLoaded', () => {
-				const passwordModal = document.getElementById('password-modal');
-				const passwordInput = document.getElementById('password-input');
-				const passwordSubmit = document.getElementById('password-submit');
-				const debugPanel = document.getElementById('debug-panel');
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const debugPanel = document.getElementById('debug-panel');
+        debugPanel.style.display = 'block';  // 自动显示调试面板
 
-				const DEBUG_PASSWORD = '54188';
+        const applyDebugSettings = document.getElementById('apply-debug-settings');
+        applyDebugSettings.addEventListener('click', () => {
+            const debugSettings = {
+                maxScore: document.getElementById('max-score').value || 1000,
+                minScore: document.getElementById('min-score').value || 0,
+                ballSize: document.getElementById('ball-size').value || 4,
+                rotationSpeed: document.getElementById('rotation-speed').value || 2000,
+                enable3DMode: document.getElementById('3d-mode').checked
+            };
 
-				function validatePassword() {
-					if (passwordInput.value === DEBUG_PASSWORD) {
-						passwordModal.style.display = 'none';
-						debugPanel.style.display = 'block';
-						initDebugMode();
-					} else {
-						alert('密码错误');
-					}
-				}
-
-				passwordSubmit.addEventListener('click', validatePassword);
-				passwordInput.addEventListener('keyup', (e) => {
-					if (e.key === 'Enter') {
-						validatePassword();
-					}
-				});
-
-				function initDebugMode() {
-					const applyDebugSettings = document.getElementById('apply-debug-settings');
-					applyDebugSettings.addEventListener('click', () => {
-						const debugSettings = {
-							maxScore: document.getElementById('max-score').value || 1000,
-							minScore: document.getElementById('min-score').value || 0,
-							ballSize: document.getElementById('ball-size').value || 4,
-							rotationSpeed: document.getElementById('rotation-speed').value || 2000,
-							enable3DMode: document.getElementById('3d-mode').checked
-						};
-
-						// 调用script.js中的enableDebugMode方法
-						window.loopTapApp.enableDebugMode(debugSettings);
-					});
-				}
-			});
-		</script>
+            window.loopTapApp.enableDebugMode(debugSettings);
+        });
+    });
+</script>
 	</body>
 </html>
