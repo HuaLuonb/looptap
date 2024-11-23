@@ -9,14 +9,19 @@ const loopTapApp = Vue.createApp({
             best: window.localStorage.best || 0,
             state: "init",
             prevTapTime: 0,
-            debugMode: true,
+            debugMode: false,
+            debugPanelOpen: false,
+            passwordEntered: false,
+            passwordInput: '',
+            correctPassword: '54188',
             debugSettings: {
                 maxScore: 1000,
                 minScore: 0,
                 ballSize: 4,
                 rotationSpeed: 2000,
                 enable3DMode: false,
-                tapTolerance: 60
+                tapTolerance: 60,
+                customTolerance: 0
             },
             colors: [
                 "#ED5565", "#D9444F", "#ED5F56", "#DA4C43", "#F87D52", 
@@ -34,6 +39,25 @@ const loopTapApp = Vue.createApp({
         },
     },
     methods: {
+        toggleDebugPanel() {
+            if (!this.passwordEntered) {
+                this.checkPassword();
+            } else {
+                this.debugPanelOpen = !this.debugPanelOpen;
+            }
+        },
+
+        checkPassword() {
+            if (this.passwordInput === this.correctPassword) {
+                this.passwordEntered = true;
+                this.debugPanelOpen = true;
+                this.passwordInput = '';
+            } else {
+                alert('密码错误');
+                this.passwordInput = '';
+            }
+        },
+
         normalizeAngle(angle) {
             return ((angle % 360) + 360) % 360;
         },
@@ -81,9 +105,9 @@ const loopTapApp = Vue.createApp({
             const ballAngle = this.normalizeAngle(this.getBallAngle());
             const arcStart = this.normalizeAngle(this.arc[0]);
             const arcEnd = this.normalizeAngle(this.arc[1]);
-            const tolerance = this.debugSettings.tapTolerance;
+            
+            const tolerance = this.debugSettings.tapTolerance + this.debugSettings.customTolerance;
 
-            // 处理跨360度的情况
             if (arcStart > arcEnd) {
                 return (
                     (ballAngle >= arcStart - tolerance && ballAngle <= 360) || 
@@ -134,7 +158,6 @@ const loopTapApp = Vue.createApp({
                     break;
                 case "started":
                     const isInArc = this.checkBallInArc();
-                    console.log('Ball Angle:', this.getBallAngle(), 'Arc:', this.arc, 'In Arc:', isInArc);
 
                     if (isInArc) {
                         const currentTapTime = Date.now();
@@ -159,50 +182,30 @@ const loopTapApp = Vue.createApp({
                 )
             };
 
-            console.log('Debug Settings Updated:', this.debugSettings);
+            if (settings.maxScore !== undefined) {
+                this.debugSettings.maxScore = Number(settings.maxScore);
+            }
+
+            if (settings.minScore !== undefined) {
+                this.debugSettings.minScore = Number(settings.minScore);
+            }
 
             const ball = document.getElementById('ball');
             if (ball) {
                 ball.setAttribute('r', this.debugSettings.ballSize);
-                console.log('Ball Size Set:', this.debugSettings.ballSize);
             }
 
             const looptapElement = document.getElementById('looptap');
             if (looptapElement) {
                 if (this.debugSettings.enable3DMode) {
                     looptapElement.style.transform = 'perspective(500px) rotateX(45deg)';
-                    console.log('3D Mode Enabled');
                 } else {
                     looptapElement.style.transform = 'none';
-                    console.log('3D Mode Disabled');
                 }
             }
 
             if (ball) {
                 ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
-                console.log('Rotation Speed Set:', this.debugSettings.rotationSpeed);
-            }
-
-            const debugStateEl = document.getElementById('debug-state');
-            const debugScoreEl = document.getElementById('debug-score');
-            const debugTapsEl = document.getElementById('debug-taps');
-            const debugColorEl = document.getElementById('debug-color');
-
-            if (debugStateEl) debugStateEl.textContent = this.state;
-            if (debugScoreEl) debugScoreEl.textContent = this.score;
-            if (debugTapsEl) debugTapsEl.textContent = this.taps;
-            if (debugColorEl) {
-                debugColorEl.textContent = this.colors[Math.floor(this.score / 10)] || '未知';
-            }
-
-            if (settings.maxScore !== undefined) {
-                this.debugSettings.maxScore = Number(settings.maxScore);
-                console.log('Max Score Set:', this.debugSettings.maxScore);
-            }
-
-            if (settings.minScore !== undefined) {
-                this.debugSettings.minScore = Number(settings.minScore);
-                console.log('Min Score Set:', this.debugSettings.minScore);
             }
         }
     },
