@@ -85,10 +85,10 @@
                         id="ball"
                         cx="50"
                         cy="50"
-                        :r="debugMode ? debugSettings.ballSize : 4"
+                        :r="developerMode ? developerSettings.ballSize : 4"
                         fill="#2C3D51"
                         v-bind:class="state"
-                        v-bind:style="'animation-duration: '+(debugMode ? debugSettings.rotationSpeed : 2000 - taps * 5) + 'ms'"
+                        v-bind:style="'animation-duration: '+(developerMode ? developerSettings.rotationSpeed : 2000 - taps * 5) + 'ms'"
                     />
                     <polygon
                         id="play"
@@ -129,20 +129,52 @@
                 <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
             </div>
 
-            <!-- Debug 面板 -->
-            <div id="debugPanel" v-if="debugMode" style="position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: white; padding: 10px;">
-                <h3>Debug 设置</h3>
+            <div 
+                id="developerModeToggle" 
+                style="
+                    position: fixed; 
+                    bottom: 10px; 
+                    left: 50%; 
+                    transform: translateX(-50%); 
+                    background-color: #2C3D51; 
+                    color: white; 
+                    padding: 10px; 
+                    border-radius: 5px; 
+                    cursor: pointer;
+                    z-index: 1000;
+                "
+                @click="toggleDeveloperMode"
+            >
+                开发者模式
+            </div>
+
+            <div 
+                id="developerPanel" 
+                v-if="developerMode" 
+                style="
+                    position: fixed; 
+                    bottom: 0; 
+                    left: 0; 
+                    width: 100%; 
+                    background: rgba(0,0,0,0.8); 
+                    color: white; 
+                    padding: 15px; 
+                    z-index: 999;
+                "
+            >
+                <h3>开发者模式设置</h3>
                 <div>
                     <label>球大小: 
-                        <input type="number" :value="debugSettings.ballSize" @input="updateDebugSettings('ballSize', $event.target.value)" min="1" max="10">
+                        <input type="number" :value="developerSettings.ballSize" @input="updateDeveloperSettings('ballSize', $event.target.value)" min="1" max="10">
                     </label>
                     <label>旋转速度: 
-                        <input type="number" :value="debugSettings.rotationSpeed" @input="updateDebugSettings('rotationSpeed', $event.target.value)" min="500" max="5000">
+                        <input type="number" :value="developerSettings.rotationSpeed" @input="updateDeveloperSettings('rotationSpeed', $event.target.value)" min="500" max="5000">
                     </label>
                     <label>自动播放: 
-                        <input type="checkbox" :checked="debugSettings.autoPlay" @change="debugSettings.autoPlay = !debugSettings.autoPlay">
+                        <input type="checkbox" :checked="developerSettings.autoPlay" @change="developerSettings.autoPlay = !developerSettings.autoPlay">
                     </label>
                     <button @click="toggleThreeDMode">切换 3D 模式</button>
+                    <button @click="resetDeveloperMode">重置设置</button>
                 </div>
             </div>
         </section>
