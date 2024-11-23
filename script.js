@@ -40,12 +40,13 @@ const loopTapApp = Vue.createApp({
     },
     methods: {
         toggleDebugPanel() {
-            if (!this.passwordEntered) {
-                this.checkPassword();
-            } else {
-                this.debugPanelOpen = !this.debugPanelOpen;
-            }
-        },
+toggleDebugPanel() {
+    if (!this.passwordEntered) {
+        this.debugPanelOpen = true;
+    } else {
+        this.debugPanelOpen = !this.debugPanelOpen;
+    }
+},
 
         checkPassword() {
             if (this.passwordInput === this.correctPassword) {
