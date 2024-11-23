@@ -17,9 +17,9 @@ const loopTapApp = Vue.createApp({
             debugSettings: {
                 maxScore: 1000,
                 minScore: 0,
-                ballSize: 4,
+                ballSize: 2,
                 ballColor: '#2C3D51',
-                arcWidth: 10,
+                arcWidth: 6,
                 arcColor: '#bdc3c7',
                 rotationSpeed: 2000,
                 enable3DMode: false,
@@ -27,7 +27,12 @@ const loopTapApp = Vue.createApp({
                 rotateY: 0,
                 rotateZ: 0,
                 tapTolerance: 60,
-                customTolerance: 0
+                customTolerance: 0,
+                ballTrail: false,
+                backgroundMusic: false,
+                soundEffects: true,
+                gameSpeed: 1,
+                randomColorMode: false
             },
             colors: [
                 "#ED5565", "#D9444F", "#ED5F56", "#DA4C43", "#F87D52", 
@@ -37,6 +42,10 @@ const loopTapApp = Vue.createApp({
                 "#5C9DED", "#4C8CDC", "#9398EC", "#7277D5", "#CC93EF", 
                 "#B377D9", "#ED87BF", "#D870AE"
             ],
+            audio: {
+                backgroundMusic: null,
+                tapSound: null
+            }
         };
     },
     computed: {
@@ -44,7 +53,26 @@ const loopTapApp = Vue.createApp({
             return this.describeArc(50, 50, 40, this.arc[0], this.arc[1]);
         },
     },
+    mounted() {
+        // 初始化音频
+        this.audio.backgroundMusic = new Audio('background.mp3');
+        this.audio.tapSound = new Audio('tap.mp3');
+    },
     methods: {
+        toggleBackgroundMusic() {
+            if (this.debugSettings.backgroundMusic) {
+                this.audio.backgroundMusic.play();
+            } else {
+                this.audio.backgroundMusic.pause();
+            }
+        },
+
+        playTapSound() {
+            if (this.debugSettings.soundEffects) {
+                this.audio.tapSound.play();
+            }
+        },
+
         toggleDebugPanel() {
             if (!this.passwordEntered) {
                 this.debugPanelOpen = true;
@@ -66,22 +94,21 @@ const loopTapApp = Vue.createApp({
         },
 
         applyDebugSettings() {
-            // 应用球设置
             const ball = document.getElementById('ball');
+            const arc = document.getElementById('arc');
+            const looptapElement = document.getElementById('looptap');
+
             if (ball) {
                 ball.setAttribute('r', this.debugSettings.ballSize);
                 ball.setAttribute('fill', this.debugSettings.ballColor);
+                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
             }
 
-            // 应用弧线设置
-            const arc = document.getElementById('arc');
             if (arc) {
                 arc.setAttribute('stroke', this.debugSettings.arcColor);
                 arc.setAttribute('stroke-width', this.debugSettings.arcWidth);
             }
 
-            // 应用3D效果
-            const looptapElement = document.getElementById('looptap');
             if (looptapElement) {
                 if (this.debugSettings.enable3DMode) {
                     looptapElement.style.transform = `
@@ -94,10 +121,7 @@ const loopTapApp = Vue.createApp({
                 }
             }
 
-            // 应用旋转速度
-            if (ball) {
-                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
-            }
+            this.toggleBackgroundMusic();
         },
 
         normalizeAngle(angle) {
@@ -175,12 +199,26 @@ const loopTapApp = Vue.createApp({
             this.score = 0;
             this.prevTapTime = Date.now();
             this.setArc();
+            
+            if (this.debugSettings.randomColorMode) {
+                this.colors = this.shuffleColors(this.colors);
+            }
+        },
+
+        shuffleColors(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
         },
 
         stopPlay() {
             if (this.state === "started") {
                 this.state = "stopped";
-                if (this.score > this.best) window.localStorage.best = this.best = this.score;
+                if (this.score > this.best) {
+                    window.localStorage.best = this.best = this.score;
+                }
             }
         },
 
@@ -209,6 +247,7 @@ const loopTapApp = Vue.createApp({
                         this.score += (tapInterval < 500 ? 5 : tapInterval < 1000 ? 2 : 1);
                         this.prevTapTime = currentTapTime;
                         this.setArc();
+                        this.playTapSound();
                     } else {
                         this.stopPlay();
                     }
@@ -226,7 +265,8 @@ const loopTapApp = Vue.createApp({
             };
 
             if (settings.maxScore !== undefined) {
-                this.debugSettings.maxScore = Number(settings.maxScore);
+                this.best = Number(settings.maxScore);
+                window.localStorage.best = this.best;
             }
 
             if (settings.minScore !== undefined) {
