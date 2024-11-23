@@ -6,32 +6,43 @@
     <title>Looptap Game</title>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        body, html {
+        html, body {
             margin: 0;
             padding: 0;
             height: 100%;
+            width: 100%;
             overflow: hidden;
-            background-color: #f0f0f0;
             display: flex;
             justify-content: center;
             align-items: center;
+            background-color: #f0f0f0;
             font-family: Arial, sans-serif;
         }
         #canvas {
-            width: 100%;
-            max-width: 500px;
-            aspect-ratio: 1/1;
+            width: 100vmin;
+            height: 100vmin;
+            max-width: 100%;
+            max-height: 100%;
             position: relative;
-            perspective: 1000px;
         }
         #looptap {
             width: 100%;
             height: 100%;
-            transition: all 0.5s;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
         #bg {
             width: 100%;
             height: 100%;
+        }
+        #ball {
+            transform-origin: center;
+            animation: rotate linear infinite;
+        }
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         #debug-panel {
             position: fixed;
@@ -44,8 +55,8 @@
             border-radius: 12px;
             width: 380px;
             transition: right 0.3s ease;
-            overflow-y: auto;
             max-height: 80vh;
+            overflow-y: auto;
         }
         #debug-panel.open {
             right: 10px;
@@ -68,55 +79,70 @@
             border: none;
             padding: 0;
         }
-        #ball {
-            animation: rotate 2000ms linear infinite;
+        .password-section {
+            display: flex;
+            gap: 10px;
         }
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+        .password-section input {
+            flex-grow: 1;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #333;
+            color: white;
+        }
+        .password-section button {
+            padding: 8px 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .debug-settings label {
+            display: block;
+            margin: 10px 0;
         }
     </style>
     <script defer src="script.js"></script>
 </head>
 <body>
     <div id="canvas">
-        <div id="looptap">
-            <svg 
-                id="bg" 
-                viewBox="0 0 100 100" 
-                xmlns="http://www.w3.org/2000/svg"
-            >
-                <path
-                    id="arc"
-                    fill="none"
-                    v-bind:stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
-                    v-bind:stroke-width="debugSettings.arcWidth"
-                    stroke-linejoin="round"
-                    stroke-linecap="round"
-                    v-bind:d="arcDValue"
-                />
-                <circle
-                    id="ball"
-                    cx="50"
-                    cy="50"
-                    v-bind:r="debugSettings.ballSize"
-                    v-bind:fill="debugSettings.ballColor"
-                    v-bind:class="state"
-                    v-bind:style="'animation-duration: '+(debugSettings.rotationSpeed) + 'ms'"
-                />
-                <polygon
-                    id="play"
-                    points="45,45 55,50 45,55"
-                    v-bind:fill="debugSettings.ballColor"
-                    v-bind:stroke="debugSettings.ballColor"
-                    stroke-width="5"
-                    stroke-linejoin="round"
-                    stroke-linecap="round"
-                    v-if="state !== 'started'"
-                    v-on:click="startPlay"
-                />
-            </svg>
-        </div>
+        <svg 
+            id="looptap" 
+            viewBox="0 0 100 100" 
+            xmlns="http://www.w3.org/2000/svg"
+        >
+            <path
+                id="arc"
+                fill="none"
+                v-bind:stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
+                v-bind:stroke-width="debugSettings.arcWidth"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+                v-bind:d="arcDValue"
+            />
+            <circle
+                id="ball"
+                cx="50"
+                cy="50"
+                v-bind:r="debugSettings.ballSize"
+                v-bind:fill="debugSettings.ballColor"
+                v-bind:class="state"
+                v-bind:style="`animation-duration: ${debugSettings.rotationSpeed}ms`"
+            />
+            <polygon
+                id="play"
+                points="45,45 55,50 45,55"
+                v-bind:fill="debugSettings.ballColor"
+                v-bind:stroke="debugSettings.ballColor"
+                stroke-width="5"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+                v-if="state !== 'started'"
+                v-on:click="startPlay"
+            />
+        </svg>
 
         <button @click="toggleDebugPanel" class="debug-toggle-btn">
             {{ passwordEntered ? (debugPanelOpen ? '关闭' : '打开') : '输入密码' }}调试
@@ -146,46 +172,34 @@
 
                 <div class="debug-settings">
                     <h4>球设置</h4>
-                    <div>
-                        <label>球大小: 
-                            <input type="range" min="1" max="10" v-model.number="debugSettings.ballSize">
-                            {{ debugSettings.ballSize }}
-                        </label>
-                    </div>
-                    <div>
-                        <label>球颜色: 
-                            <input type="color" class="color-picker" v-model="debugSettings.ballColor">
-                        </label>
-                    </div>
+                    <label>球大小: 
+                        <input type="range" min="1" max="10" v-model.number="debugSettings.ballSize">
+                        {{ debugSettings.ballSize }}
+                    </label>
+                    <label>球颜色: 
+                        <input type="color" class="color-picker" v-model="debugSettings.ballColor">
+                    </label>
 
                     <h4>弧线设置</h4>
-                    <div>
-                        <label>弧线宽度: 
-                            <input type="range" min="1" max="20" v-model.number="debugSettings.arcWidth">
-                            {{ debugSettings.arcWidth }}
-                        </label>
-                    </div>
-                    <div>
-                        <label>弧线颜色: 
-                            <input type="color" class="color-picker" v-model="debugSettings.arcColor">
-                        </label>
-                    </div>
+                    <label>弧线宽度: 
+                        <input type="range" min="1" max="20" v-model.number="debugSettings.arcWidth">
+                        {{ debugSettings.arcWidth }}
+                    </label>
+                    <label>弧线颜色: 
+                        <input type="color" class="color-picker" v-model="debugSettings.arcColor">
+                    </label>
 
                     <h4>动画设置</h4>
-                    <div>
-                        <label>旋转速度: 
-                            <input type="range" min="100" max="5000" v-model.number="debugSettings.rotationSpeed">
-                            {{ debugSettings.rotationSpeed }}ms
-                        </label>
-                    </div>
+                    <label>旋转速度: 
+                        <input type="range" min="100" max="5000" v-model.number="debugSettings.rotationSpeed">
+                        {{ debugSettings.rotationSpeed }}ms
+                    </label>
 
                     <h4>3D模式</h4>
-                    <div>
-                        <label>
-                            <input type="checkbox" v-model="debugSettings.enable3DMode">
-                            启用3D模式
-                        </label>
-                    </div>
+                    <label>
+                        <input type="checkbox" v-model="debugSettings.enable3DMode">
+                        启用3D模式
+                    </label>
                     <div v-if="debugSettings.enable3DMode">
                         <label>X轴旋转: 
                             <input type="range" min="-45" max="45" v-model.number="debugSettings.rotateX">
@@ -202,42 +216,30 @@
                     </div>
 
                     <h4>游戏参数</h4>
-                    <div>
-                        <label>最大分数: 
-                            <input type="number" v-model.number="debugSettings.maxScore">
-                        </label>
-                    </div>
-                    <div>
-                        <label>最小分数: 
-                            <input type="number" v-model.number="debugSettings.minScore">
-                        </label>
-                    </div>
-                    <div>
-                        <label>自定义容错率: 
-                            <input type="range" min="0" max="100" v-model.number="debugSettings.customTolerance">
-                            {{ debugSettings.customTolerance }}
-                        </label>
-                    </div>
+                    <label>最大分数: 
+                        <input type="number" v-model.number="debugSettings.maxScore">
+                    </label>
+                    <label>最小分数: 
+                        <input type="number" v-model.number="debugSettings.minScore">
+                    </label>
+                    <label>自定义容错率: 
+                        <input type="range" min="0" max="100" v-model.number="debugSettings.customTolerance">
+                        {{ debugSettings.customTolerance }}
+                    </label>
 
                     <h4>额外功能</h4>
-                    <div>
-                        <label>
-                            <input type="checkbox" v-model="debugSettings.backgroundMusic">
-                            背景音乐
-                        </label>
-                    </div>
-                    <div>
-                        <label>
-                            <input type="checkbox" v-model="debugSettings.soundEffects">
-                            音效
-                        </label>
-                    </div>
-                    <div>
-                        <label>
-                            <input type="checkbox" v-model="debugSettings.randomColorMode">
-                            随机颜色模式
-                        </label>
-                    </div>
+                    <label>
+                        <input type="checkbox" v-model="debugSettings.backgroundMusic">
+                        背景音乐
+                    </label>
+                    <label>
+                        <input type="checkbox" v-model="debugSettings.soundEffects">
+                        音效
+                    </label>
+                    <label>
+                        <input type="checkbox" v-model="debugSettings.randomColorMode">
+                        随机颜色模式
+                    </label>
 
                     <button @click="applyDebugSettings">应用所有设置</button>
                 </div>
