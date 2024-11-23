@@ -36,19 +36,47 @@
 				position: fixed;
 				top: 10px;
 				right: 10px;
-				background: rgba(0,0,0,0.7);
+				background: rgba(0,0,0,0.8);
 				color: white;
-				padding: 10px;
+				padding: 15px;
 				z-index: 1000;
-				border-radius: 8px;
-				width: 250px;
+				border-radius: 12px;
+				width: 280px;
+				box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+				transition: all 0.3s ease;
 			}
 			#debug-settings {
-				margin-top: 10px;
+				margin-top: 15px;
 			}
 			#debug-settings input {
 				width: 100%;
-				margin-bottom: 5px;
+				margin-bottom: 10px;
+				padding: 8px;
+				border-radius: 6px;
+				border: 1px solid #444;
+				background: #333;
+				color: white;
+			}
+			.debug-btn {
+				width: 100%;
+				padding: 10px;
+				background: #4CAF50;
+				color: white;
+				border: none;
+				border-radius: 6px;
+				cursor: pointer;
+				transition: background 0.3s ease;
+			}
+			.debug-btn:hover {
+				background: #45a049;
+			}
+			#3d-mode-container {
+				display: flex;
+				align-items: center;
+				margin-bottom: 10px;
+			}
+			#3d-mode-container label {
+				margin-left: 10px;
 			}
 		</style>
 	</head>
@@ -64,14 +92,27 @@
 			</div>
 			<div id="debug-settings">
 				<h4>调试设置</h4>
-				<input type="number" id="max-score" placeholder="最大分数" value="1000">
-				<input type="number" id="min-score" placeholder="最小分数" value="0">
-				<input type="number" id="ball-size" placeholder="球大小" value="4">
-				<input type="number" id="rotation-speed" placeholder="旋转速度" value="2000">
-				<label>
-					<input type="checkbox" id="3d-mode"> 3D模式
-				</label>
-				<button id="apply-debug-settings">应用设置</button>
+				<div>
+					<input type="number" id="max-score" placeholder="最大分数" value="1000">
+					<button id="max-score-btn" class="debug-btn">确定最大分数</button>
+				</div>
+				<div>
+					<input type="number" id="min-score" placeholder="最小分数" value="0">
+					<button id="min-score-btn" class="debug-btn">确定最小分数</button>
+				</div>
+				<div>
+					<input type="number" id="ball-size" placeholder="球大小" value="4">
+					<button id="ball-size-btn" class="debug-btn">确定球大小</button>
+				</div>
+				<div>
+					<input type="number" id="rotation-speed" placeholder="旋转速度" value="2000">
+					<button id="rotation-speed-btn" class="debug-btn">确定旋转速度</button>
+				</div>
+				<div id="3d-mode-container">
+					<input type="checkbox" id="3d-mode">
+					<label for="3d-mode">3D模式</label>
+				</div>
+				<button id="3d-mode-btn" class="debug-btn">确定3D模式</button>
 			</div>
 		</div>
 
@@ -171,25 +212,45 @@
 
 		<script>
 			document.addEventListener('DOMContentLoaded', () => {
-				const applyDebugSettings = document.getElementById('apply-debug-settings');
-				applyDebugSettings.addEventListener('click', () => {
-					const debugSettings = {
-						maxScore: document.getElementById('max-score').value !== '' 
-							? Number(document.getElementById('max-score').value) 
-							: undefined,
-						minScore: document.getElementById('min-score').value !== '' 
-							? Number(document.getElementById('min-score').value) 
-							: undefined,
-						ballSize: document.getElementById('ball-size').value !== '' 
-							? Number(document.getElementById('ball-size').value) 
-							: undefined,
-						rotationSpeed: document.getElementById('rotation-speed').value !== '' 
-							? Number(document.getElementById('rotation-speed').value) 
-							: undefined,
-						enable3DMode: document.getElementById('3d-mode').checked
-					};
+				const debugSettings = {
+					maxScore: undefined,
+					minScore: undefined,
+					ballSize: undefined,
+					rotationSpeed: undefined,
+					enable3DMode: false
+				};
 
-					console.log('Applying Debug Settings:', debugSettings);
+				// 最大分数
+				document.getElementById('max-score-btn').addEventListener('click', () => {
+					const value = document.getElementById('max-score').value;
+					debugSettings.maxScore = value !== '' ? Number(value) : undefined;
+					window.loopTapApp.enableDebugMode(debugSettings);
+				});
+
+				// 最小分数
+				document.getElementById('min-score-btn').addEventListener('click', () => {
+					const value = document.getElementById('min-score').value;
+					debugSettings.minScore = value !== '' ? Number(value) : undefined;
+					window.loopTapApp.enableDebugMode(debugSettings);
+				});
+
+				// 球大小
+				document.getElementById('ball-size-btn').addEventListener('click', () => {
+					const value = document.getElementById('ball-size').value;
+					debugSettings.ballSize = value !== '' ? Number(value) : undefined;
+					window.loopTapApp.enableDebugMode(debugSettings);
+				});
+
+				// 旋转速度
+				document.getElementById('rotation-speed-btn').addEventListener('click', () => {
+					const value = document.getElementById('rotation-speed').value;
+					debugSettings.rotationSpeed = value !== '' ? Number(value) : undefined;
+					window.loopTapApp.enableDebugMode(debugSettings);
+				});
+
+				// 3D模式
+				document.getElementById('3d-mode-btn').addEventListener('click', () => {
+					debugSettings.enable3DMode = document.getElementById('3d-mode').checked;
 					window.loopTapApp.enableDebugMode(debugSettings);
 				});
 			});
