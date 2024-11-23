@@ -9,7 +9,7 @@ const loopTapApp = Vue.createApp({
             best: window.localStorage.best || 0,
             state: "init",
             prevTapTime: 0,
-            debugMode: false,
+            debugMode: true,
             debugSettings: {
                 maxScore: 1000,
                 minScore: 0,
