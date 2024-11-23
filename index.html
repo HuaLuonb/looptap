@@ -31,12 +31,91 @@
 		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 		<script defer src="script.js"></script>
 
-		<!-- ANALYTICS_SCRIPT: Please remove it for your use -->
-		<script async defer src="https://scripts.withcabin.com/hello.js"></script>
-
+		<style>
+			#debug-panel {
+				position: fixed;
+				top: 10px;
+				right: 10px;
+				background: rgba(0,0,0,0.7);
+				color: white;
+				padding: 10px;
+				display: none;
+				z-index: 1000;
+				border-radius: 8px;
+				width: 250px;
+			}
+			#debug-settings {
+				margin-top: 10px;
+			}
+			#debug-settings input {
+				width: 100%;
+				margin-bottom: 5px;
+			}
+			#password-modal {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0,0,0,0.8);
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				z-index: 2000;
+			}
+			#password-container {
+				background: white;
+				padding: 20px;
+				border-radius: 10px;
+				text-align: center;
+			}
+			#password-input {
+				padding: 10px;
+				font-size: 16px;
+				margin-bottom: 10px;
+				width: 200px;
+			}
+			#password-submit {
+				padding: 10px 20px;
+				background-color: #2C3D51;
+				color: white;
+				border: none;
+				border-radius: 5px;
+				cursor: pointer;
+			}
+		</style>
 	</head>
 
 	<body>
+		<div id="password-modal">
+			<div id="password-container">
+				<h2>输入调试密码</h2>
+				<input type="password" id="password-input" placeholder="请输入密码">
+				<button id="password-submit">确认</button>
+			</div>
+		</div>
+
+		<div id="debug-panel">
+			<h3>调试信息</h3>
+			<div id="debug-info">
+				<p>状态: <span id="debug-state"></span></p>
+				<p>分数: <span id="debug-score"></span></p>
+				<p>点击次数: <span id="debug-taps"></span></p>
+				<p>颜色: <span id="debug-color"></span></p>
+			</div>
+			<div id="debug-settings">
+				<h4>调试设置</h4>
+				<input type="number" id="max-score" placeholder="最大分数">
+				<input type="number" id="min-score" placeholder="最小分数">
+				<input type="number" id="ball-size" placeholder="球大小">
+				<input type="number" id="rotation-speed" placeholder="旋转速度">
+				<label>
+					<input type="checkbox" id="3d-mode"> 3D模式
+				</label>
+				<button id="apply-debug-settings">应用设置</button>
+			</div>
+		</div>
+
 		<section id="canvas">
 			<div id="game" style="height: 80vh; display: flex">
 				<svg id="looptap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -130,5 +209,49 @@
 				<script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
 			</div>
 		</section>
+
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const passwordModal = document.getElementById('password-modal');
+				const passwordInput = document.getElementById('password-input');
+				const passwordSubmit = document.getElementById('password-submit');
+				const debugPanel = document.getElementById('debug-panel');
+
+				const DEBUG_PASSWORD = '54188';
+
+				function validatePassword() {
+					if (passwordInput.value === DEBUG_PASSWORD) {
+						passwordModal.style.display = 'none';
+						debugPanel.style.display = 'block';
+						initDebugMode();
+					} else {
+						alert('密码错误');
+					}
+				}
+
+				passwordSubmit.addEventListener('click', validatePassword);
+				passwordInput.addEventListener('keyup', (e) => {
+					if (e.key === 'Enter') {
+						validatePassword();
+					}
+				});
+
+				function initDebugMode() {
+					const applyDebugSettings = document.getElementById('apply-debug-settings');
+					applyDebugSettings.addEventListener('click', () => {
+						const debugSettings = {
+							maxScore: document.getElementById('max-score').value || 1000,
+							minScore: document.getElementById('min-score').value || 0,
+							ballSize: document.getElementById('ball-size').value || 4,
+							rotationSpeed: document.getElementById('rotation-speed').value || 2000,
+							enable3DMode: document.getElementById('3d-mode').checked
+						};
+
+						// 调用script.js中的enableDebugMode方法
+						window.loopTapApp.enableDebugMode(debugSettings);
+					});
+				}
+			});
+		</script>
 	</body>
 </html>
