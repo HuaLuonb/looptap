@@ -1,240 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Looptap Game</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background-color: #f0f0f0;
-            font-family: Arial, sans-serif;
-        }
-        #canvas {
-            width: 80vmin;
-            height: 80vmin;
-            position: relative;
-        }
-        #looptap {
-            width: 100%;
-            height: 100%;
-        }
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        #ball {
-            transform-origin: center;
-            animation: rotate 2s linear infinite;
-        }
-        #debug-panel {
-            position: fixed;
-            top: 10px;
-            right: -400px;
-            background: rgba(0,0,0,0.8);
-            color: white;
-            padding: 15px;
-            z-index: 1000;
-            border-radius: 12px;
-            width: 380px;
-            transition: right 0.3s ease;
-            max-height: 80vh;
-            overflow-y: auto;
-        }
-        #debug-panel.open {
-            right: 10px;
-        }
-        .debug-toggle-btn {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            z-index: 1001;
-            padding: 8px 15px;
-            background: #2196F3;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .color-picker {
-            width: 50px;
-            height: 50px;
-            border: none;
-            padding: 0;
-        }
-        .password-section {
-            display: flex;
-            gap: 10px;
-        }
-        .password-section input {
-            flex-grow: 1;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid #444;
-            background: #333;
-            color: white;
-        }
-        .password-section button {
-            padding: 8px 15px;
-            background: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-        .debug-settings label {
-            display: block;
-            margin: 10px 0;
-        }
-    </style>
-    <script defer src="script.js"></script>
-</head>
-<body>
-    <div id="canvas">
-        <svg 
-            id="looptap" 
-            viewBox="0 0 100 100" 
-            xmlns="http://www.w3.org/2000/svg"
-        >
-            <path
-                id="arc"
-                fill="none"
-                v-bind:stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
-                v-bind:stroke-width="6"
-                stroke-linejoin="round"
-                stroke-linecap="round"
-                v-bind:d="arcDValue"
-            />
-            <circle
-                id="ball"
-                cx="50"
-                cy="50"
-                r="3"
-                v-bind:fill="debugSettings.ballColor"
-                v-bind:class="state"
-            />
-            <polygon
-                id="play"
-                points="45,45 55,50 45,55"
-                v-bind:fill="debugSettings.ballColor"
-                v-bind:stroke="debugSettings.ballColor"
-                stroke-width="5"
-                stroke-linejoin="round"
-                stroke-linecap="round"
-                v-if="state !== 'started'"
-                v-on:click="startPlay"
-            />
-        </svg>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <meta http-equiv="Cache-control" content="public" />
+        <meta
+            name="viewport"
+            content="width=device-width, height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        />
+        <meta name="description" content="A minimal game to waste your time." />
+        <meta name="keywords" content="minimal game, html5 game, svg game" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="apple-mobile-web-app-title" content="Looptap" />
+        <meta name="application-name" content="Looptap" />
+        <meta name="theme-color" content="#fbf9f6" />
+        <meta property="og:url" content="https://vasanthv.github.io/looptap" />
+        <meta property="og:image" content="https://vasanthv.github.io/looptap/banner.png" />
+        <meta property="og:title" content="Looptap" />
+        <meta property="og:description" content="A minimal game to waste your time." />
+        <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+        <link rel="icon" href="favicon.svg" />
+        <link rel="manifest" href="manifest.json" />
+        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#2c3d51" />
+        <meta name="msapplication-TileColor" content="#fbf9f6" />
+        <meta name="theme-color" content="#fbf9f6" />
+        <title>Looptap - A minimal game to waste your time</title>
 
-        <button @click="toggleDebugPanel" class="debug-toggle-btn">
-            {{ passwordEntered ? (debugPanelOpen ? '关闭' : '打开') : '输入密码' }}调试
-        </button>
+        <link href="style.css" rel="stylesheet" />
+        <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+        <script defer src="script.js"></script>
 
-        <div id="debug-panel" :class="{ 'open': debugPanelOpen }">
-            <div v-if="!passwordEntered" class="password-section">
-                <input 
-                    type="password" 
-                    v-model="passwordInput" 
-                    placeholder="输入密码" 
-                    @keyup.enter="checkPassword"
+        <!-- ANALYTICS_SCRIPT: Please remove it for your use -->
+        <script async defer src="https://scripts.withcabin.com/hello.js"></script>
+    </head>
+
+    <body>
+        <section id="canvas">
+            <div id="game" style="height: 80vh; display: flex">
+                <svg id="looptap" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                    <rect id="bg" x="0" cy="0" height="100" width="100" fill="none" />
+                    <text
+                        x="50"
+                        y="50"
+                        dominant-baseline="middle"
+                        text-anchor="middle"
+                        class="score"
+                        id="score"
+                        v-if="state === 'started'"
+                        v-html="score"
+                    ></text>
+                    <text
+                        x="50"
+                        y="32"
+                        text-anchor="middle"
+                        class="score"
+                        id="finalscore"
+                        v-if="state === 'stopped'"
+                        v-html="score"
+                    ></text>
+                    <text
+                        x="50"
+                        y="70"
+                        text-anchor="middle"
+                        class="score"
+                        id="best"
+                        v-if="state === 'stopped'"
+                        v-html="'Best: '+best"
+                    ></text>
+                    <g id="tip" v-if="state === 'init'">
+                        <text x="50" y="68" text-anchor="middle" class="tip">Tap anywhere / press spacebar when</text>
+                        <text x="50" y="74" text-anchor="middle" class="tip">the ball is on the colored area.</text>
+                    </g>
+                    <path
+                        id="arc"
+                        fill="none"
+                        v-bind:stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
+                        stroke-width="10"
+                        stroke-linejoin="round"
+                        stroke-linecap="round"
+                        v-bind:d="arcDValue"
+                    />
+                    <circle
+                        id="ball"
+                        cx="50"
+                        cy="50"
+                        :r="debugMode ? debugSettings.ballSize : 4"
+                        fill="#2C3D51"
+                        v-bind:class="state"
+                        v-bind:style="'animation-duration: '+(debugMode ? debugSettings.rotationSpeed : 2000 - taps * 5) + 'ms'"
+                    />
+                    <polygon
+                        id="play"
+                        points="45,45 55,50 45,55"
+                        fill="#2C3D51"
+                        stroke="#2C3D51"
+                        stroke-width="5"
+                        stroke-linejoin="round"
+                        stroke-linecap="round"
+                        v-if="state !== 'started'"
+                        v-on:click="startPlay"
+                    />
+                </svg>
+            </div>
+            <a
+                id="shareBtn"
+                v-bind:href="'https://twitter.com/intent/tweet?url=https%3A%2F%2Fvasanthv.github.io%2Flooptap%2F&text=Beat%20my%20score%3A%20'+score+'%0aLooptap%20-%20a%20minimal%20game%20to%20waste%20your%20time.&hashtags=looptap'"
+                v-if="['stopped', 'started'].includes(state)"
+                target="_blank"
+                v-bind:class="state === 'started' ? 'hide' : ''"
+            >
+                Share your score
+            </a>
+            <div id="about" v-if="state === 'init'">
+                Looptap is made by
+                <a href="https://twitter.com/vsnthv" target="_blank">Vasanth</a>
+                <br />
+                <a
+                    href="https://twitter.com/share?ref_src=twsrc%5Etfw"
+                    class="twitter-share-button"
+                    data-text="Looptap - a minimal game to waste your time."
+                    data-url="https://vasanthv.github.io/looptap"
+                    data-via="vsnthv"
+                    data-hashtags="looptap"
+                    data-show-count="false"
+                    >Tweet</a
                 >
-                <button @click="checkPassword">确认</button>
+                <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
             </div>
-            
-            <div v-else>
-                <h3>调试信息</h3>
+
+            <!-- Debug 面板 -->
+            <div id="debugPanel" v-if="debugMode" style="position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.7); color: white; padding: 10px;">
+                <h3>Debug 设置</h3>
                 <div>
-                    <p>状态: {{ state }}</p>
-                    <p>分数: {{ score }}</p>
-                    <p>点击次数: {{ taps }}</p>
-                    <p>颜色: {{ colors[Math.floor(score / 10)] || '未知' }}</p>
-                    <p>最佳分数: {{ best }}</p>
-                    <p>当前弧度: {{ arc }}</p>
-                </div>
-
-                <div class="debug-settings">
-                    <h4>球设置</h4>
                     <label>球大小: 
-                        <input type="range" min="1" max="10" v-model.number="debugSettings.ballSize">
-                        {{ debugSettings.ballSize }}
+                        <input type="number" :value="debugSettings.ballSize" @input="updateDebugSettings('ballSize', $event.target.value)" min="1" max="10">
                     </label>
-                    <label>球颜色: 
-                        <input type="color" class="color-picker" v-model="debugSettings.ballColor">
-                    </label>
-
-                    <h4>弧线设置</h4>
-                    <label>弧线宽度: 
-                        <input type="range" min="1" max="20" v-model.number="debugSettings.arcWidth">
-                        {{ debugSettings.arcWidth }}
-                    </label>
-                    <label>弧线颜色: 
-                        <input type="color" class="color-picker" v-model="debugSettings.arcColor">
-                    </label>
-
-                    <h4>动画设置</h4>
                     <label>旋转速度: 
-                        <input type="range" min="100" max="5000" v-model.number="debugSettings.rotationSpeed">
-                        {{ debugSettings.rotationSpeed }}ms
+                        <input type="number" :value="debugSettings.rotationSpeed" @input="updateDebugSettings('rotationSpeed', $event.target.value)" min="500" max="5000">
                     </label>
-
-                    <h4>3D模式</h4>
-                    <label>
-                        <input type="checkbox" v-model="debugSettings.enable3DMode">
-                        启用3D模式
+                    <label>自动播放: 
+                        <input type="checkbox" :checked="debugSettings.autoPlay" @change="debugSettings.autoPlay = !debugSettings.autoPlay">
                     </label>
-                    <div v-if="debugSettings.enable3DMode">
-                        <label>X轴旋转: 
-                            <input type="range" min="-45" max="45" v-model.number="debugSettings.rotateX">
-                            {{ debugSettings.rotateX }}°
-                        </label>
-                        <label>Y轴旋转: 
-                            <input type="range" min="-45" max="45" v-model.number="debugSettings.rotateY">
-                            {{ debugSettings.rotateY }}°
-                        </label>
-                        <label>Z轴旋转: 
-                            <input type="range" min="-45" max="45" v-model.number="debugSettings.rotateZ">
-                            {{ debugSettings.rotateZ }}°
-                        </label>
-                    </div>
-
-                    <h4>游戏参数</h4>
-                    <label>最大分数: 
-                        <input type="number" v-model.number="debugSettings.maxScore">
-                    </label>
-                    <label>最小分数: 
-                        <input type="number" v-model.number="debugSettings.minScore">
-                    </label>
-                    <label>自定义容错率: 
-                        <input type="range" min="0" max="100" v-model.number="debugSettings.customTolerance">
-                        {{ debugSettings.customTolerance }}
-                    </label>
-
-                    <h4>额外功能</h4>
-                    <label>
-                        <input type="checkbox" v-model="debugSettings.backgroundMusic">
-                        背景音乐
-                    </label>
-                    <label>
-                        <input type="checkbox" v-model="debugSettings.soundEffects">
-                        音效
-                    </label>
-                    <label>
-                        <input type="checkbox" v-model="debugSettings.randomColorMode">
-                        随机颜色模式
-                    </label>
-
-                    <button @click="applyDebugSettings">应用所有设置</button>
+                    <button @click="toggleThreeDMode">切换 3D 模式</button>
                 </div>
             </div>
-        </div>
-    </div>
-</body>
+        </section>
+    </body>
 </html>
