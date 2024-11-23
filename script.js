@@ -215,6 +215,42 @@ const loopTapApp = Vue.createApp({
                     break;
             }
         },
+
+        enableDebugMode(settings = {}) {
+            this.debugMode = true;
+            this.debugSettings = { 
+                ...this.debugSettings, 
+                ...Object.fromEntries(
+                    Object.entries(settings).filter(([_, value]) => value !== undefined && value !== null)
+                )
+            };
+
+            if (settings.maxScore !== undefined) {
+                this.debugSettings.maxScore = Number(settings.maxScore);
+            }
+
+            if (settings.minScore !== undefined) {
+                this.debugSettings.minScore = Number(settings.minScore);
+            }
+
+            const ball = document.getElementById('ball');
+            if (ball) {
+                ball.setAttribute('r', this.debugSettings.ballSize);
+            }
+
+            const looptapElement = document.getElementById('looptap');
+            if (looptapElement) {
+                if (this.debugSettings.enable3DMode) {
+                    looptapElement.style.transform = 'perspective(500px) rotateX(45deg)';
+                } else {
+                    looptapElement.style.transform = 'none';
+                }
+            }
+
+            if (ball) {
+                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
+            }
+        }
     },
 }).mount("#canvas");
 
