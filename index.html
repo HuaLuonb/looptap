@@ -39,7 +39,6 @@
 				background: rgba(0,0,0,0.7);
 				color: white;
 				padding: 10px;
-				display: none;
 				z-index: 1000;
 				border-radius: 8px;
 				width: 250px;
@@ -51,43 +50,10 @@
 				width: 100%;
 				margin-bottom: 5px;
 			}
-			#password-modal {
-				position: fixed;
-				top: 0;
-				left: 0;
-				width: 100%;
-				height: 100%;
-				background: rgba(0,0,0,0.8);
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				z-index: 2000;
-			}
-			#password-container {
-				background: white;
-				padding: 20px;
-				border-radius: 10px;
-				text-align: center;
-			}
-			#password-input {
-				padding: 10px;
-				font-size: 16px;
-				margin-bottom: 10px;
-				width: 200px;
-			}
-			#password-submit {
-				padding: 10px 20px;
-				background-color: #2C3D51;
-				color: white;
-				border: none;
-				border-radius: 5px;
-				cursor: pointer;
-			}
 		</style>
 	</head>
 
 	<body>
-
 		<div id="debug-panel">
 			<h3>调试信息</h3>
 			<div id="debug-info">
@@ -98,10 +64,10 @@
 			</div>
 			<div id="debug-settings">
 				<h4>调试设置</h4>
-				<input type="number" id="max-score" placeholder="最大分数">
-				<input type="number" id="min-score" placeholder="最小分数">
-				<input type="number" id="ball-size" placeholder="球大小">
-				<input type="number" id="rotation-speed" placeholder="旋转速度">
+				<input type="number" id="max-score" placeholder="最大分数" value="1000">
+				<input type="number" id="min-score" placeholder="最小分数" value="0">
+				<input type="number" id="ball-size" placeholder="球大小" value="4">
+				<input type="number" id="rotation-speed" placeholder="旋转速度" value="2000">
 				<label>
 					<input type="checkbox" id="3d-mode"> 3D模式
 				</label>
@@ -203,24 +169,21 @@
 			</div>
 		</section>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const debugPanel = document.getElementById('debug-panel');
-        debugPanel.style.display = 'block';  // 自动显示调试面板
+		<script>
+			document.addEventListener('DOMContentLoaded', () => {
+				const applyDebugSettings = document.getElementById('apply-debug-settings');
+				applyDebugSettings.addEventListener('click', () => {
+					const debugSettings = {
+						maxScore: parseInt(document.getElementById('max-score').value) || 1000,
+						minScore: parseInt(document.getElementById('min-score').value) || 0,
+						ballSize: parseFloat(document.getElementById('ball-size').value) || 4,
+						rotationSpeed: parseInt(document.getElementById('rotation-speed').value) || 2000,
+						enable3DMode: document.getElementById('3d-mode').checked
+					};
 
-        const applyDebugSettings = document.getElementById('apply-debug-settings');
-        applyDebugSettings.addEventListener('click', () => {
-            const debugSettings = {
-                maxScore: document.getElementById('max-score').value || 1000,
-                minScore: document.getElementById('min-score').value || 0,
-                ballSize: document.getElementById('ball-size').value || 4,
-                rotationSpeed: document.getElementById('rotation-speed').value || 2000,
-                enable3DMode: document.getElementById('3d-mode').checked
-            };
-
-            window.loopTapApp.enableDebugMode(debugSettings);
-        });
-    });
-</script>
+					window.loopTapApp.enableDebugMode(debugSettings);
+				});
+			});
+		</script>
 	</body>
 </html>
