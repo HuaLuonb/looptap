@@ -19,18 +19,13 @@
             font-family: Arial, sans-serif;
         }
         #canvas {
-            width: 100vmin;
-            height: 100vmin;
-            max-width: 100%;
-            max-height: 100%;
+            width: 80vmin;
+            height: 80vmin;
             position: relative;
         }
         #looptap {
             width: 100%;
             height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
         #ball {
             transform-origin: center;
@@ -113,7 +108,7 @@
                 id="arc"
                 fill="none"
                 v-bind:stroke="colors[Math.floor(score / 10)] || colors[Math.floor((score - 270) / 10)] || '#bdc3c7'"
-                v-bind:stroke-width="debugSettings.arcWidth"
+                v-bind:stroke-width="6"
                 stroke-linejoin="round"
                 stroke-linecap="round"
                 v-bind:d="arcDValue"
@@ -122,10 +117,10 @@
                 id="ball"
                 cx="50"
                 cy="50"
-                v-bind:r="debugSettings.ballSize"
+                r="3"
                 v-bind:fill="debugSettings.ballColor"
                 v-bind:class="state"
-                v-bind:style="`animation-duration: ${debugSettings.rotationSpeed}ms`"
+                style="animation: rotate linear infinite"
             />
             <polygon
                 id="play"
