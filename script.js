@@ -17,9 +17,9 @@ const loopTapApp = Vue.createApp({
             debugSettings: {
                 maxScore: 1000,
                 minScore: 0,
-                ballSize: 2,
+                ballSize: 4,
                 ballColor: '#2C3D51',
-                arcWidth: 6,
+                arcWidth: 10,
                 arcColor: '#bdc3c7',
                 rotationSpeed: 2000,
                 enable3DMode: false,
@@ -102,6 +102,12 @@ const loopTapApp = Vue.createApp({
                 ball.setAttribute('r', this.debugSettings.ballSize);
                 ball.setAttribute('fill', this.debugSettings.ballColor);
                 ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
+                
+                // 强制重新触发动画
+                ball.style.animation = 'none';
+                setTimeout(() => {
+                    ball.style.animation = `rotate ${this.debugSettings.rotationSpeed}ms linear infinite`;
+                }, 10);
             }
 
             if (arc) {
@@ -154,17 +160,17 @@ const loopTapApp = Vue.createApp({
         },
 
         getBallAngle() {
-            const bg = document.getElementById("bg").getBoundingClientRect();
-            const bgCenter = { 
-                x: bg.left + bg.width / 2, 
-                y: bg.top + bg.height / 2 
-            };
-            const ball = document.getElementById("ball").getBoundingClientRect();
-            const ballCenter = { 
-                x: ball.left + ball.width / 2, 
-                y: ball.top + ball.height / 2 
-            };
-            return this.getAngle(bgCenter.x, bgCenter.y, ballCenter.x, ballCenter.y);
+            const ball = document.getElementById('ball');
+            const svg = document.getElementById('looptap');
+            const svgRect = svg.getBoundingClientRect();
+            const ballRect = ball.getBoundingClientRect();
+
+            const centerX = svgRect.left + svgRect.width / 2;
+            const centerY = svgRect.top + svgRect.height / 2;
+            const ballCenterX = ballRect.left + ballRect.width / 2;
+            const ballCenterY = ballRect.top + ballRect.height / 2;
+
+            return this.getAngle(centerX, centerY, ballCenterX, ballCenterY);
         },
 
         checkBallInArc() {
@@ -202,6 +208,16 @@ const loopTapApp = Vue.createApp({
             
             if (this.debugSettings.randomColorMode) {
                 this.colors = this.shuffleColors(this.colors);
+            }
+
+            // 强制触发球的旋转动画
+            const ball = document.getElementById('ball');
+            if (ball) {
+                ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
+                ball.style.animation = 'none';
+                setTimeout(() => {
+                    ball.style.animation = `rotate ${this.debugSettings.rotationSpeed}ms linear infinite`;
+                }, 10);
             }
         },
 
@@ -294,6 +310,7 @@ const loopTapApp = Vue.createApp({
     },
 }).mount("#canvas");
 
+// 事件监听器保持不变
 if ("ontouchstart" in window) {
     window.addEventListener("touchstart", (e) => {
         if (!e.target.closest('#debug-panel')) {
