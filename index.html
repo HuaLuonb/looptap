@@ -27,13 +27,13 @@
             width: 100%;
             height: 100%;
         }
-        #ball {
-            transform-origin: center;
-            animation: rotate linear infinite;
-        }
         @keyframes rotate {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+        #ball {
+            transform-origin: center;
+            animation: rotate 2s linear infinite;
         }
         #debug-panel {
             position: fixed;
@@ -120,7 +120,6 @@
                 r="3"
                 v-bind:fill="debugSettings.ballColor"
                 v-bind:class="state"
-                style="animation: rotate linear infinite"
             />
             <polygon
                 id="play"
