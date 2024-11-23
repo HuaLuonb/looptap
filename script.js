@@ -17,9 +17,9 @@ const loopTapApp = Vue.createApp({
             debugSettings: {
                 maxScore: 1000,
                 minScore: 0,
-                ballSize: 4,
+                ballSize: 3,
                 ballColor: '#2C3D51',
-                arcWidth: 10,
+                arcWidth: 6,
                 arcColor: '#bdc3c7',
                 rotationSpeed: 2000,
                 enable3DMode: false,
@@ -215,9 +215,10 @@ const loopTapApp = Vue.createApp({
             if (ball) {
                 ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
                 ball.style.animation = 'none';
-                setTimeout(() => {
-                    ball.style.animation = `rotate ${this.debugSettings.rotationSpeed}ms linear infinite`;
-                }, 10);
+                requestAnimationFrame(() => {
+                    ball.style.animation = 'rotate linear infinite';
+                    ball.style.animationDuration = `${this.debugSettings.rotationSpeed}ms`;
+                });
             }
         },
 
@@ -310,7 +311,6 @@ const loopTapApp = Vue.createApp({
     },
 }).mount("#canvas");
 
-// 事件监听器保持不变
 if ("ontouchstart" in window) {
     window.addEventListener("touchstart", (e) => {
         if (!e.target.closest('#debug-panel')) {
