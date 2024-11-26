@@ -106,7 +106,7 @@ const loopTapApp = Vue.createApp({
             }
             if (this.state === "started") {
                 const ballAngle = this.getBallAngle();
-                if (ballAngle + 20 > this.arc[0] && ballAngle - 20 < this.arc[1]) {
+                if (ballAngle + 15 > this.arc[0] && ballAngle - 6 < this.arc[1]) {
                     const currentTapTime = Date.now();
                     const tapInterval = currentTapTime - this.prevTapTime;
                     this.taps++;
