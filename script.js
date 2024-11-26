@@ -5,12 +5,12 @@ const loopTapApp = Vue.createApp({
             arc: [180, 270],
             taps: 0,
             score: 0,
-            best: window.localStorage.best || 0,
+            best: parseInt(window.localStorage.best) || 0,
             state: "init",
             prevTapTime: 0,
             developerMode: false,
             developerPassword: '54188',
-            fakeBest: 0,
+            fakeBest: parseInt(window.localStorage.best) || 0,
             developerSettings: {
                 ballSize: 4,
                 rotationSpeed: 2000,
@@ -86,14 +86,12 @@ const loopTapApp = Vue.createApp({
             if (this.state === "started") {
                 this.state = "stopped";
                 if (this.developerMode) {
-                    // 在开发者模式下，使用伪装的最高分
                     if (this.score > this.fakeBest) {
                         this.fakeBest = this.score;
                         this.best = this.fakeBest;
                         window.localStorage.best = this.best;
                     }
                 } else {
-                    // 正常模式下的最高分逻辑
                     if (this.score > this.best) {
                         window.localStorage.best = this.best = this.score;
                     }
@@ -102,8 +100,10 @@ const loopTapApp = Vue.createApp({
         },
 
         tap(e) {
-            e.preventDefault();
-            e.stopPropagation();
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
             if (this.state === "started") {
                 const ballAngle = this.getBallAngle();
                 if (ballAngle + 6 > this.arc[0] && ballAngle - 6 < this.arc[1]) {
@@ -118,22 +118,22 @@ const loopTapApp = Vue.createApp({
         },
 
         updateBallSize(event) {
-            const value = Number(event.target.value);
-            if (value >= 1 && value <= 10) {
+            const value = parseInt(event.target.value);
+            if (!isNaN(value) && value >= 1 && value <= 10) {
                 this.developerSettings.ballSize = value;
             }
         },
 
         updateRotationSpeed(event) {
-            const value = Number(event.target.value);
-            if (value >= 500 && value <= 5000) {
+            const value = parseInt(event.target.value);
+            if (!isNaN(value) && value >= 500 && value <= 5000) {
                 this.developerSettings.rotationSpeed = value;
             }
         },
 
         updateFakeBest(event) {
-            const value = Number(event.target.value);
-            if (value >= 0) {
+            const value = parseInt(event.target.value);
+            if (!isNaN(value) && value >= 0) {
                 this.fakeBest = value;
                 this.best = value;
                 window.localStorage.best = value;
@@ -189,10 +189,10 @@ const loopTapApp = Vue.createApp({
         },
 
         autoPlay() {
-            if (this.developerMode && this.developerSettings.autoPlay) {
+            if (this.developerMode && this.developerSettings.autoPlay && this.state === "started") {
                 const ballAngle = this.getBallAngle();
                 if (ballAngle + 6 > this.arc[0] && ballAngle - 6 < this.arc[1]) {
-                    this.tap({ preventDefault: () => {}, stopPropagation: () => {} });
+                    this.tap();
                 }
             }
         }
@@ -200,7 +200,7 @@ const loopTapApp = Vue.createApp({
     mounted() {
         setInterval(() => {
             this.autoPlay();
-        }, 500);
+        }, 100);
     }
 }).mount("#canvas");
 
