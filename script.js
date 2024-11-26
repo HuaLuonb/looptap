@@ -10,6 +10,7 @@ const loopTapApp = Vue.createApp({
             prevTapTime: 0,
             developerMode: false,
             developerPassword: '54188',
+            fakeBest: 0,
             developerSettings: {
                 ballSize: 4,
                 rotationSpeed: 2000,
@@ -84,7 +85,19 @@ const loopTapApp = Vue.createApp({
         stopPlay() {
             if (this.state === "started") {
                 this.state = "stopped";
-                if (this.score > this.best) window.localStorage.best = this.best = this.score;
+                if (this.developerMode) {
+                    // 在开发者模式下，使用伪装的最高分
+                    if (this.score > this.fakeBest) {
+                        this.fakeBest = this.score;
+                        this.best = this.fakeBest;
+                        window.localStorage.best = this.best;
+                    }
+                } else {
+                    // 正常模式下的最高分逻辑
+                    if (this.score > this.best) {
+                        window.localStorage.best = this.best = this.score;
+                    }
+                }
             }
         },
 
@@ -118,6 +131,15 @@ const loopTapApp = Vue.createApp({
             }
         },
 
+        updateFakeBest(event) {
+            const value = Number(event.target.value);
+            if (value >= 0) {
+                this.fakeBest = value;
+                this.best = value;
+                window.localStorage.best = value;
+            }
+        },
+
         closeDeveloperMode() {
             this.developerMode = false;
         },
@@ -125,7 +147,7 @@ const loopTapApp = Vue.createApp({
         toggleDeveloperMode() {
             const password = prompt('请输入开发者模式密码:');
             if (password === this.developerPassword) {
-                this.developerMode = true;
+                this.developerMode = !this.developerMode;
             } else {
                 alert('密码错误');
             }
@@ -142,11 +164,8 @@ const loopTapApp = Vue.createApp({
             const arc = document.getElementById('arc');
 
             if (this.threeDMode) {
-                // 更复杂的 3D 效果
                 looptap.style.transform = 'perspective(500px) rotateX(45deg) rotateY(20deg) scale(1.2)';
                 looptap.style.transition = 'transform 0.5s';
-                
-                // 球体和弧线添加 3D 效果
                 ball.style.filter = 'drop-shadow(3px 3px 3px rgba(0,0,0,0.5))';
                 arc.style.filter = 'drop-shadow(2px 2px 2px rgba(0,0,0,0.3))';
             } else {
@@ -164,6 +183,9 @@ const loopTapApp = Vue.createApp({
             };
             this.threeDMode = false;
             this.applyThreeDMode();
+            this.fakeBest = 0;
+            this.best = 0;
+            window.localStorage.best = 0;
         },
 
         autoPlay() {
