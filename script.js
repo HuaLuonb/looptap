@@ -13,7 +13,7 @@ const loopTapApp = Vue.createApp({
             developerPassword: '54188',
             fakeBest: parseInt(window.localStorage.best) || 0,
             developerSettings: {
-                ballSize: 6,
+                ballSize: 4,
                 rotationSpeed: 2000,
                 autoPlay: false
             },
