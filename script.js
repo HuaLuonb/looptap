@@ -1,38 +1,4 @@
-if (this.state === "started") {
-    const ballAngle = this.getBallAngle();
-
-    console.log("Ball Angle:", ballAngle);
-    console.log("Arc Range:", this.arc);
-
-    // 确保 `this.arc` 是有效的数组
-    if (Array.isArray(this.arc) && this.arc.length === 2) {
-        if (ballAngle + 15 > this.arc[0] && ballAngle - 6 < this.arc[1]) {
-            const currentTapTime = Date.now();
-            const tapInterval = currentTapTime - (this.prevTapTime || 0);
-
-            console.log("Tap Interval:", tapInterval);
-
-            this.taps++;
-            if (tapInterval < 500) {
-                this.score += 5;
-            } else if (tapInterval < 1000) {
-                this.score += 2;
-            } else {
-                this.score += 1;
-            }
-
-            console.log("New Score:", this.score);
-            this.prevTapTime = currentTapTime;
-            this.setArc();
-        } else {
-            console.warn("Ball missed the arc range, stopping play.");
-            this.stopPlay();
-        }
-    } else {
-        console.error("Invalid arc configuration:", this.arc);
-        this.stopPlay();
-    }
-}
+ 
 /* global Vue */
 const loopTapApp = Vue.createApp({
     data() {
