@@ -30,9 +30,6 @@
         <link href="style.css" rel="stylesheet" />
         <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
         <script defer src="script.js"></script>
-
-        <!-- ANALYTICS_SCRIPT: Please remove it for your use -->
-        <script async defer src="https://scripts.withcabin.com/hello.js"></script>
     </head>
 
     <body>
@@ -103,50 +100,26 @@
                     />
                 </svg>
             </div>
-            <a
-                id="shareBtn"
-                v-bind:href="'https://twitter.com/intent/tweet?url=https%3A%2F%2Fvasanthv.github.io%2Flooptap%2F&text=Beat%20my%20score%3A%20'+score+'%0aLooptap%20-%20a%20minimal%20game%20to%20waste%20your%20time.&hashtags=looptap'"
-                v-if="['stopped', 'started'].includes(state)"
-                target="_blank"
-                v-bind:class="state === 'started' ? 'hide' : ''"
-            >
-                Share your score
-            </a>
-            <div id="about" v-if="state === 'init'">
-                Looptap is made by
-                <a href="https://twitter.com/vsnthv" target="_blank">Vasanth</a>
-                <br />
-                <a
-                    href="https://twitter.com/share?ref_src=twsrc%5Etfw"
-                    class="twitter-share-button"
-                    data-text="Looptap - a minimal game to waste your time."
-                    data-url="https://vasanthv.github.io/looptap"
-                    data-via="vsnthv"
-                    data-hashtags="looptap"
-                    data-show-count="false"
-                    >Tweet</a
-                >
-                <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
-            </div>
 
-            <div 
-                id="developerPanel" 
-                v-if="developerMode" 
+            <!-- 添加开发者模式切换按钮 -->
+            <button 
+                @click="toggleDeveloperMode" 
                 style="
-                    position: fixed; 
-                    top: 0; 
-                    right: 0; 
-                    width: 250px; 
-                    height: 100%; 
-                    background: rgba(44, 61, 81, 0.9); 
-                    color: white; 
-                    padding: 20px; 
-                    z-index: 1000;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 15px;
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    padding: 10px;
+                    background: #2C3D51;
+                    color: white;
+                    border: none;
+                    border-radius: 5px;
+                    cursor: pointer;
                 "
             >
+                切换开发者模式
+            </button>
+
+            <div id="developerPanel" v-if="developerMode" style="position: fixed; top: 0; right: 0; width: 250px; height: 100%; background: rgba(44, 61, 81, 0.9); color: white; padding: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 15px;">
                 <h3 style="text-align: center; margin-bottom: 20px;">开发者模式</h3>
                 
                 <div>
@@ -157,13 +130,7 @@
                         @input="updateBallSize"
                         min="1" 
                         max="10"
-                        style="
-                            width: 100%; 
-                            padding: 5px; 
-                            margin-top: 5px;
-                            background: white;
-                            color: black;
-                        "
+                        style="width: 100%; padding: 5px; margin-top: 5px; background: white; color: black;"
                     >
                 </div>
                 
@@ -175,60 +142,43 @@
                         @input="updateRotationSpeed"
                         min="500" 
                         max="5000"
-                        style="
-                            width: 100%; 
-                            padding: 5px; 
-                            margin-top: 5px;
-                            background: white;
-                            color: black;
-                        "
+                        style="width: 100%; padding: 5px; margin-top: 5px; background: white; color: black;"
+                    >
+                </div>
+
+                <div>
+                    <label>设置最高分:</label>
+                    <input 
+                        type="number" 
+                        v-model.number="fakeBest"
+                        @input="updateFakeBest"
+                        style="width: 100%; padding: 5px; margin-top: 5px; background: white; color: black;"
                     >
                 </div>
                 
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <label>自动播放:</label>
-                    <input 
-                        type="checkbox" 
-                        v-model="developerSettings.autoPlay"
-                    >
+                    <input type="checkbox" v-model="developerSettings.autoPlay">
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
                     <button 
                         @click="toggleThreeDMode" 
-                        style="
-                            background-color: #4CAF50; 
-                            color: white; 
-                            border: none; 
-                            padding: 10px; 
-                            border-radius: 5px;
-                        "
+                        style="background-color: #4CAF50; color: white; border: none; padding: 10px; border-radius: 5px;"
                     >
                         {{ threeDMode ? '关闭3D模式' : '开启3D模式' }}
                     </button>
                     
                     <button 
                         @click="resetDeveloperMode"
-                        style="
-                            background-color: #f44336; 
-                            color: white; 
-                            border: none; 
-                            padding: 10px; 
-                            border-radius: 5px;
-                        "
+                        style="background-color: #f44336; color: white; border: none; padding: 10px; border-radius: 5px;"
                     >
                         重置设置
                     </button>
                     
                     <button 
                         @click="closeDeveloperMode"
-                        style="
-                            background-color: #2C3D51; 
-                            color: white; 
-                            border: none; 
-                            padding: 10px; 
-                            border-radius: 5px;
-                        "
+                        style="background-color: #2C3D51; color: white; border: none; padding: 10px; border-radius: 5px;"
                     >
                         关闭开发者模式
                     </button>
