@@ -32,6 +32,21 @@ const loopTapApp = Vue.createApp({
             return this.describeArc(50, 50, 40, this.arc[0], this.arc[1]);
         },
     },
+    watch: {
+        'developerSettings.ballSize'(newValue) {
+            if (newValue < 1) this.developerSettings.ballSize = 1;
+            if (newValue > 10) this.developerSettings.ballSize = 10;
+        },
+        'developerSettings.rotationSpeed'(newValue) {
+            if (newValue < 500) this.developerSettings.rotationSpeed = 500;
+            if (newValue > 5000) this.developerSettings.rotationSpeed = 5000;
+        },
+        fakeBest(newValue) {
+            if (newValue < 0) this.fakeBest = 0;
+            this.best = newValue;
+            window.localStorage.best = newValue;
+        }
+    },
     methods: {
         polarToCartesian(centerX, centerY, radius, angleInDegrees) {
             const angleInRadians = ((angleInDegrees - 90) * Math.PI) / 180.0;
@@ -114,29 +129,6 @@ const loopTapApp = Vue.createApp({
                     this.prevTapTime = currentTapTime;
                     this.setArc();
                 } else this.stopPlay();
-            }
-        },
-
-        updateBallSize(event) {
-            const value = parseInt(event.target.value);
-            if (!isNaN(value) && value >= 1 && value <= 10) {
-                this.developerSettings.ballSize = value;
-            }
-        },
-
-        updateRotationSpeed(event) {
-            const value = parseInt(event.target.value);
-            if (!isNaN(value) && value >= 500 && value <= 5000) {
-                this.developerSettings.rotationSpeed = value;
-            }
-        },
-
-        updateFakeBest(event) {
-            const value = parseInt(event.target.value);
-            if (!isNaN(value) && value >= 0) {
-                this.fakeBest = value;
-                this.best = value;
-                window.localStorage.best = value;
             }
         },
 
