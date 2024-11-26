@@ -15,16 +15,6 @@
         <meta name="apple-mobile-web-app-title" content="Looptap" />
         <meta name="application-name" content="Looptap" />
         <meta name="theme-color" content="#fbf9f6" />
-        <meta property="og:url" content="https://vasanthv.github.io/looptap" />
-        <meta property="og:image" content="https://vasanthv.github.io/looptap/banner.png" />
-        <meta property="og:title" content="Looptap" />
-        <meta property="og:description" content="A minimal game to waste your time." />
-        <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
-        <link rel="icon" href="favicon.svg" />
-        <link rel="manifest" href="manifest.json" />
-        <link rel="mask-icon" href="safari-pinned-tab.svg" color="#2c3d51" />
-        <meta name="msapplication-TileColor" content="#fbf9f6" />
-        <meta name="theme-color" content="#fbf9f6" />
         <title>Looptap - A minimal game to waste your time</title>
 
         <link href="style.css" rel="stylesheet" />
@@ -104,64 +94,50 @@
             <!-- 开发者模式切换按钮 -->
             <button 
                 @click="toggleDeveloperMode" 
-                style="
-                    position: fixed;
-                    bottom: 20px;
-                    right: 20px;
-                    padding: 10px;
-                    background: #2C3D51;
-                    color: white;
-                    border: none;
-                    border-radius: 5px;
-                    cursor: pointer;
-                    z-index: 1000;
-                "
+                style="position: fixed; bottom: 20px; right: 20px; padding: 10px; background: #2C3D51; color: white; border: none; border-radius: 5px; cursor: pointer; z-index: 1000;"
             >
                 切换开发者模式
             </button>
 
             <!-- 开发者面板 -->
-            <div id="developerPanel" v-if="developerMode" style="position: fixed; top: 0; right: 0; width: 250px; height: 100%; background: rgba(44, 61, 81, 0.9); color: white; padding: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 15px;">
+            <div id="developerPanel" v-if="developerMode" style="position: fixed; top: 0; right: 0; width: 250px; height: 100%; background: rgba(44, 61, 81, 0.9); color: white; padding: 20px; z-index: 1000;">
                 <h3 style="text-align: center; margin-bottom: 20px;">开发者模式</h3>
                 
-                <div>
-                    <label>球大小 (1-10):</label>
+                <div style="margin-bottom: 15px;">
+                    <label>球大小 (1-10):</label><br>
                     <input 
                         type="number" 
-                        v-model.number="developerSettings.ballSize"
-                        min="1" 
-                        max="10"
-                        style="width: 100%; padding: 5px; margin-top: 5px; background: white; color: black;"
+                        v-model="developerSettings.ballSize" 
+                        style="width: 100%; padding: 5px; margin-top: 5px;"
                     >
                 </div>
                 
-                <div>
-                    <label>旋转速度 (500-5000):</label>
+                <div style="margin-bottom: 15px;">
+                    <label>旋转速度 (500-5000):</label><br>
                     <input 
                         type="number" 
-                        v-model.number="developerSettings.rotationSpeed"
-                        min="500" 
-                        max="5000"
-                        style="width: 100%; padding: 5px; margin-top: 5px; background: white; color: black;"
+                        v-model="developerSettings.rotationSpeed"
+                        style="width: 100%; padding: 5px; margin-top: 5px;"
                     >
                 </div>
 
-                <div>
-                    <label>设置最高分:</label>
+                <div style="margin-bottom: 15px;">
+                    <label>设置最高分:</label><br>
                     <input 
                         type="number" 
-                        v-model.number="fakeBest"
-                        min="0"
-                        style="width: 100%; padding: 5px; margin-top: 5px; background: white; color: black;"
+                        v-model="fakeBest"
+                        style="width: 100%; padding: 5px; margin-top: 5px;"
                     >
                 </div>
                 
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <label>自动播放:</label>
-                    <input 
-                        type="checkbox" 
-                        v-model="developerSettings.autoPlay"
-                    >
+                <div style="margin-bottom: 15px;">
+                    <label>
+                        <input 
+                            type="checkbox" 
+                            v-model="developerSettings.autoPlay"
+                        >
+                        自动播放
+                    </label>
                 </div>
                 
                 <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
