@@ -1,3 +1,9 @@
+/* global Vue */
+const loopTapApp = Vue.createApp({
+	data() {
+		return {
+			arc: [180, 270],
+			taps: 0,
 			score: 0,
 			best: window.localStorage.best || 0,
 			state: "init",
@@ -53,7 +59,8 @@
 			const end = this.polarToCartesian(x, y, radius, startAngle);
 			const arcFlag = endAngle - startAngle <= 180 ? "0" : "1";
 			const d = ["M", start.x, start.y, "A", radius, radius, 0, arcFlag, 0, end.x, end.y].join(" ");
-			return d;
+
+					return d;
 		},
 
 		getAngle(cx, cy, ex, ey) {
@@ -101,7 +108,7 @@
 			if (this.state === "started") {
 				const ballAngle = this.getBallAngle();
 				// adding a 6 for better accuracy as the arc stroke extends beyond the angle.
-				if (ballAngle + 7 > this.arc[0] && ballAngle - 7 < this.arc[1]) {
+				if (ballAngle + 10 > this.arc[0] && ballAngle - 10 < this.arc[1]) {
 					const currentTapTime = Date.now();
 					const tapInterval = currentTapTime - this.prevTapTime;
 					this.taps++;
@@ -112,7 +119,8 @@
 			}
 		},
 	},
-}).mount("#canvas");
+
+	}).mount("#canvas");
 
 if ("ontouchstart" in window) {
 	window.addEventListener("touchstart", loopTapApp.tap);
