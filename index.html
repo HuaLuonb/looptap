@@ -100,68 +100,53 @@
             </button>
 
             <!-- 开发者面板 -->
-            <div id="developerPanel" v-if="developerMode" style="position: fixed; top: 0; right: 0; width: 250px; height: 100%; background: rgba(44, 61, 81, 0.9); color: white; padding: 20px; z-index: 1000;">
-                <h3 style="text-align: center; margin-bottom: 20px;">开发者模式</h3>
-                
-                <div style="margin-bottom: 15px;">
-                    <label>球大小 (1-10):</label><br>
-                    <input 
-                        type="number" 
-                        v-model="developerSettings.ballSize" 
-                        style="width: 100%; padding: 5px; margin-top: 5px;"
-                    >
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label>旋转速度 (500-5000):</label><br>
-                    <input 
-                        type="number" 
-                        v-model="developerSettings.rotationSpeed"
-                        style="width: 100%; padding: 5px; margin-top: 5px;"
-                    >
-                </div>
+<div v-if="developerMode" style="position: fixed; top: 0; right: 0; width: 250px; background: rgba(0,0,0,0.8); padding: 20px; color: white;">
+    <h3>开发者模式</h3>
+    
+    <div>
+        <label>球大小:</label>
+        <input type="text" 
+            style="width: 100px; margin: 5px;"
+            @input="event => developerSettings.ballSize = Number(event.target.value)"
+            :value="developerSettings.ballSize"
+        >
+    </div>
 
-                <div style="margin-bottom: 15px;">
-                    <label>设置最高分:</label><br>
-                    <input 
-                        type="number" 
-                        v-model="fakeBest"
-                        style="width: 100%; padding: 5px; margin-top: 5px;"
-                    >
-                </div>
-                
-                <div style="margin-bottom: 15px;">
-                    <label>
-                        <input 
-                            type="checkbox" 
-                            v-model="developerSettings.autoPlay"
-                        >
-                        自动播放
-                    </label>
-                </div>
-                
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-                    <button 
-                        @click="toggleThreeDMode" 
-                        style="background-color: #4CAF50; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;"
-                    >
-                        {{ threeDMode ? '关闭3D模式' : '开启3D模式' }}
-                    </button>
-                    
-                    <button 
-                        @click="resetDeveloperMode"
-                        style="background-color: #f44336; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;"
-                    >
-                        重置设置
-                    </button>
-                    
-                    <button 
-                        @click="closeDeveloperMode"
-                        style="background-color: #2C3D51; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;"
-                    >
-                        关闭开发者模式
-                    </button>
-                </div>
+    <div>
+        <label>旋转速度:</label>
+        <input type="text" 
+            style="width: 100px; margin: 5px;"
+            @input="event => developerSettings.rotationSpeed = Number(event.target.value)"
+            :value="developerSettings.rotationSpeed"
+        >
+    </div>
+
+    <div>
+        <label>最高分:</label>
+        <input type="text" 
+            style="width: 100px; margin: 5px;"
+            @input="event => {
+                fakeBest = Number(event.target.value);
+                best = Number(event.target.value);
+                localStorage.best = event.target.value;
+            }"
+            :value="fakeBest"
+        >
+    </div>
+
+    <div>
+        <label>
+            <input type="checkbox" 
+                @change="event => developerSettings.autoPlay = event.target.checked"
+                :checked="developerSettings.autoPlay"
+            >
+            自动播放
+        </label>
+    </div>
+
+    <button @click="resetDeveloperMode">重置</button>
+    <button @click="developerMode = false">关闭</button>
+</div>
             </div>
         </section>
     </body>
