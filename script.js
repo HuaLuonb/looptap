@@ -42,7 +42,7 @@ const loopTapApp = Vue.createApp({
 	},
 	computed: {
 		arcDValue() {
-			return this.describeArc(50, 50, 40, this.arc[0], this.arc[1]);
+			return this.describeArc(30, 30, 20, this.arc[0], this.arc[1]);
 		},
 	},
 	methods: {
@@ -112,7 +112,7 @@ const loopTapApp = Vue.createApp({
 					const currentTapTime = Date.now();
 					const tapInterval = currentTapTime - this.prevTapTime;
 					this.taps++;
-					this.score = this.score + (tapInterval < 500 ? 100 : tapInterval < 1000 ? 100 : 100);
+					this.score = this.score + (tapInterval < 500 ? 100 : tapInterval < 1000 ? 100000 : 10000000);
 					this.prevTapTime = currentTapTime;
 					this.setArc();
 				} else this.stopPlay();
