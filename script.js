@@ -42,7 +42,7 @@ const loopTapApp = Vue.createApp({
 	},
 	computed: {
 		arcDValue() {
-			return this.describeArc(30, 30, 20, this.arc[0], this.arc[1]);
+			return this.describeArc(50, 50, 40, this.arc[0], this.arc[1]);
 		},
 	},
 	methods: {
